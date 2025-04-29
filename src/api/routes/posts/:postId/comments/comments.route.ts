@@ -4,8 +4,8 @@ import { z } from 'zod';
 
 import { getCommentsByPostId } from 'src/controllers/comments/get-comments';
 import { createComment } from 'src/controllers/comments/create-comment';
-import { GetCommentByIdRespSchema } from '../schemas/comments/GetCommentByIdRespSchema';
-import { CreateCommentReqSchema } from '../schemas/comments/CreateCommentReqSchema';
+import { GetCommentByIdRespSchema } from 'src/api/routes/schemas/comments/GetCommentByIdRespSchema';
+import { CreateCommentReqSchema } from 'src/api/routes/schemas/comments/CreateCommentReqSchema';
 
 const routes: FastifyPluginAsync = async function (f) {
   const fastify = f.withTypeProvider<ZodTypeProvider>();
@@ -14,7 +14,7 @@ const routes: FastifyPluginAsync = async function (f) {
     '/',
     {
       schema: {
-        querystring: z.object({
+        params: z.object({
           postId: z.string().uuid()
         }),
         response: {
@@ -27,10 +27,8 @@ const routes: FastifyPluginAsync = async function (f) {
       const createdComment = await createComment({
         commentsRepo: fastify.repos.commentsRepo,
         payload: request.body,
-        postId: request.query.postId
+        postId: request.params.postId
       });
-
-      // return createdComment;
 
       reply.code(201).send(createdComment);
     }
@@ -43,7 +41,7 @@ const routes: FastifyPluginAsync = async function (f) {
         response: {
           200: z.array(GetCommentByIdRespSchema)
         },
-        querystring: z.object({
+        params: z.object({
           postId: z.string().uuid()
         })
       }
@@ -51,7 +49,7 @@ const routes: FastifyPluginAsync = async function (f) {
     async (request) => {
       return getCommentsByPostId({
         commentsRepo: fastify.repos.commentsRepo,
-        postId: request.query.postId
+        postId: request.params.postId
       });
     }
   );

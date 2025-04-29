@@ -6,6 +6,5 @@ export async function createComment(params: {
   payload: TCreateCommentReqSchema;
   postId: string;
 }) {
-  throw new Error('My test error');
   return params.commentsRepo.createComment(params.payload, params.postId);
 }
