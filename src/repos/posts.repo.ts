@@ -1,11 +1,10 @@
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { and, asc, count, desc, eq, getTableColumns, gt, gte, inArray, or, sql } from 'drizzle-orm';
+import { and, asc, count, desc, eq, getTableColumns, gt, gte, ilike, or } from 'drizzle-orm';
 
 import { IPostsRepo } from 'src/types/entities/IPostsRepo';
 import { posts } from 'src/services/drizzle/schema';
 import { comments } from 'src/services/drizzle/schema';
-import { TGetCommentByIdRespSchema } from 'src/api/routes/schemas/comments/GetCommentByIdRespSchema';
-import { TGetPostByIdRespSchema } from 'src/api/routes/schemas/posts/GetPostByIdRespSchema';
+import { TGetPostByIdRespSchemaExtendedCommentsCount } from 'src/api/routes/schemas/posts/GetPostByIdRespSchema';
 
 export function getPostsRepo(db: NodePgDatabase): IPostsRepo {
   return {
@@ -53,9 +52,7 @@ export function getPostsRepo(db: NodePgDatabase): IPostsRepo {
       const havingClause = minCommentsCount ? gte(count(comments.id), minCommentsCount) : undefined;
 
       const whereSearchClause =
-        search && search.trim() !== ''
-          ? sql`to_tsvector('english', ${posts.title}) @@ to_tsquery('english', ${search})`
-          : undefined;
+        search && search.trim() !== '' ? ilike(posts.title, `%${search}%`) : undefined;
 
       const whereCursorPaginationClause = isCursorPagination
         ? or(
@@ -71,8 +68,8 @@ export function getPostsRepo(db: NodePgDatabase): IPostsRepo {
       const sortColumn = sortFields[sortBy || 'createdAt'];
       const orderByClause = sortOrder === 'desc' ? desc(sortColumn) : asc(sortColumn);
 
-      const postsList: TGetPostByIdRespSchema[] = await db
-        .select({ ...getTableColumns(posts) })
+      const postsList: TGetPostByIdRespSchemaExtendedCommentsCount[] = await db
+        .select({ ...getTableColumns(posts), commentsCount: count(comments.id) })
         .from(posts)
         .where(whereClause)
         .leftJoin(comments, eq(comments.postId, posts.id))
@@ -82,29 +79,7 @@ export function getPostsRepo(db: NodePgDatabase): IPostsRepo {
         .limit(pageSize)
         .offset(isCursorPagination ? 0 : (page - 1) * pageSize);
 
-      const postIds = postsList.map(({ id }) => id);
-
-      const commentsList = await db
-        .select()
-        .from(comments)
-        .where(inArray(comments.postId, postIds));
-
-      const commentsMap = commentsList.reduce((map, comment) => {
-        if (!map.has(comment.postId)) {
-          map.set(comment.postId, []);
-        }
-
-        map.get(comment.postId)?.push(comment);
-
-        return map;
-      }, new Map<string, TGetCommentByIdRespSchema[]>());
-
-      const result = postsList.map((post) => ({
-        ...post,
-        comments: commentsMap.get(post.id) ?? []
-      }));
-
-      return result;
+      return postsList;
     },
 
     async updatePost(payload, postId) {

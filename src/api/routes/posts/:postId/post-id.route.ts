@@ -8,7 +8,7 @@ import { updatePost } from 'src/controllers/posts/update-post';
 import { UpdatePostReqSchema } from '../../schemas/posts/UpdatePostReqSchema';
 import {
   GetPostByIdRespSchema,
-  GetPostByIdRespSchemaExtended
+  GetPostByIdRespSchemaExtendedComments
 } from '../../schemas/posts/GetPostByIdRespSchema';
 
 const routes: FastifyPluginAsync = async function (f) {
@@ -19,7 +19,7 @@ const routes: FastifyPluginAsync = async function (f) {
     {
       schema: {
         response: {
-          200: GetPostByIdRespSchemaExtended
+          200: GetPostByIdRespSchemaExtendedComments
         },
         params: z.object({
           postId: z.string().uuid()

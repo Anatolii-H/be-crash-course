@@ -10,8 +10,12 @@ export const GetPostByIdRespSchema = z.object({
   updatedAt: z.date()
 });
 
-export const GetPostByIdRespSchemaExtended = GetPostByIdRespSchema.extend({
+export const GetPostByIdRespSchemaExtendedComments = GetPostByIdRespSchema.extend({
   comments: z.array(GetCommentByIdRespSchema)
+});
+
+export const GetPostByIdRespSchemaExtendedCommentsCount = GetPostByIdRespSchema.extend({
+  commentsCount: z.number()
 });
 
 export const GetPostsReqQueries = z
@@ -38,5 +42,10 @@ export const GetPostsReqQueries = z
   );
 
 export type TGetPostByIdRespSchema = z.infer<typeof GetPostByIdRespSchema>;
-export type TGetPostByIdRespSchemaExtended = z.infer<typeof GetPostByIdRespSchemaExtended>;
+export type TGetPostByIdRespSchemaExtendedComments = z.infer<
+  typeof GetPostByIdRespSchemaExtendedComments
+>;
+export type TGetPostByIdRespSchemaExtendedCommentsCount = z.infer<
+  typeof GetPostByIdRespSchemaExtendedCommentsCount
+>;
 export type TGetPostsReqQueries = z.infer<typeof GetPostsReqQueries>;

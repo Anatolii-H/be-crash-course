@@ -7,7 +7,7 @@ import { getPosts } from 'src/controllers/posts/get-posts';
 import { CreatePostReqSchema } from '../schemas/posts/CreatePostReqSchema';
 import {
   GetPostByIdRespSchema,
-  GetPostByIdRespSchemaExtended,
+  GetPostByIdRespSchemaExtendedCommentsCount,
   GetPostsReqQueries
 } from '../schemas/posts/GetPostByIdRespSchema';
 
@@ -40,7 +40,7 @@ const routes: FastifyPluginAsync = async function (f) {
       schema: {
         querystring: GetPostsReqQueries,
         response: {
-          200: z.array(GetPostByIdRespSchemaExtended)
+          200: z.array(GetPostByIdRespSchemaExtendedCommentsCount)
         }
       }
     },
