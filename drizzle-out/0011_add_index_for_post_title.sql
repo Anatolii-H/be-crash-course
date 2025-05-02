@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS title_search_index ON posts USING gin (title gin_trgm_ops);

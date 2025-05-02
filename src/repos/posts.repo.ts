@@ -1,5 +1,5 @@
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { and, asc, count, desc, eq, getTableColumns, gt, gte, ilike, or } from 'drizzle-orm';
+import { and, asc, count, desc, eq, getTableColumns, gt, gte, or, sql } from 'drizzle-orm';
 
 import { IPostsRepo } from 'src/types/entities/IPostsRepo';
 import { posts } from 'src/services/drizzle/schema';
@@ -52,7 +52,12 @@ export function getPostsRepo(db: NodePgDatabase): IPostsRepo {
       const havingClause = minCommentsCount ? gte(count(comments.id), minCommentsCount) : undefined;
 
       const whereSearchClause =
-        search && search.trim() !== '' ? ilike(posts.title, `%${search}%`) : undefined;
+        search && search.trim() !== ''
+          ? or(
+              sql`similarity(${posts.title}, ${search}) > 0.2`,
+              sql`similarity(${posts.description}, ${search}) > 0.2`
+            )
+          : undefined;
 
       const whereCursorPaginationClause = isCursorPagination
         ? or(

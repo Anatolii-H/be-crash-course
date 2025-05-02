@@ -71,6 +71,27 @@
       "when": 1746189039338,
       "tag": "0009_eminent_goliath",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1746196922612,
+      "tag": "0010_add_pg_trgm_module",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1746196961465,
+      "tag": "0011_add_index_for_post_title",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1746197920053,
+      "tag": "0012_add_index_for_post_description",
+      "breakpoints": true
     }
   ]
 }

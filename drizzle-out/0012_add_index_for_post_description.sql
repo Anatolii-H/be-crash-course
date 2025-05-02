@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS description_search_index ON posts USING gin (description gin_trgm_ops);
