@@ -1,10 +1,11 @@
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { eq, ilike, inArray } from 'drizzle-orm';
+import { and, asc, count, desc, eq, getTableColumns, gt, gte, inArray, or, sql } from 'drizzle-orm';
 
 import { IPostsRepo } from 'src/types/entities/IPostsRepo';
 import { posts } from 'src/services/drizzle/schema';
 import { comments } from 'src/services/drizzle/schema';
 import { TGetCommentByIdRespSchema } from 'src/api/routes/schemas/comments/GetCommentByIdRespSchema';
+import { TGetPostByIdRespSchema } from 'src/api/routes/schemas/posts/GetPostByIdRespSchema';
 
 export function getPostsRepo(db: NodePgDatabase): IPostsRepo {
   return {
@@ -30,17 +31,57 @@ export function getPostsRepo(db: NodePgDatabase): IPostsRepo {
     },
 
     async getPosts(queries) {
-      const { page, pageSize, search } = queries;
+      const {
+        page,
+        pageSize,
+        search,
+        cursorCreatedAt,
+        cursorId,
+        sortBy,
+        sortOrder,
+        minCommentsCount
+      } = queries;
 
-      const whereClause =
-        search && search.trim() !== '' ? ilike(posts.title, `%${search}%`) : undefined;
+      const sortFields = {
+        title: posts.title,
+        createdAt: posts.createdAt,
+        commentsCount: count(comments.id)
+      };
 
-      const postsList = await db
-        .select()
+      const isCursorPagination = cursorCreatedAt && cursorId;
+
+      const havingClause = minCommentsCount ? gte(count(comments.id), minCommentsCount) : undefined;
+
+      const whereSearchClause =
+        search && search.trim() !== ''
+          ? sql`to_tsvector('english', ${posts.title}) @@ to_tsquery('english', ${search})`
+          : undefined;
+
+      const whereCursorPaginationClause = isCursorPagination
+        ? or(
+            gt(posts.createdAt, cursorCreatedAt),
+            and(eq(posts.createdAt, cursorCreatedAt), gt(posts.id, cursorId))
+          )
+        : undefined;
+
+      const whereClause = isCursorPagination
+        ? and(whereSearchClause, whereCursorPaginationClause)
+        : whereSearchClause;
+
+      const sortColumn = sortFields[sortBy || 'createdAt'];
+      const orderByClause = sortOrder === 'desc' ? desc(sortColumn) : asc(sortColumn);
+
+      const postsList: TGetPostByIdRespSchema[] = await db
+        .select({ ...getTableColumns(posts) })
         .from(posts)
         .where(whereClause)
+        .leftJoin(comments, eq(comments.postId, posts.id))
+        .groupBy(posts.id)
+        .having(havingClause)
+        .orderBy(orderByClause)
         .limit(pageSize)
-        .offset((page - 1) * pageSize);
+        .offset(isCursorPagination ? 0 : (page - 1) * pageSize);
+
       const postIds = postsList.map(({ id }) => id);
 
       const commentsList = await db
@@ -48,15 +89,15 @@ export function getPostsRepo(db: NodePgDatabase): IPostsRepo {
         .from(comments)
         .where(inArray(comments.postId, postIds));
 
-      const commentsMap = new Map<string, TGetCommentByIdRespSchema[]>();
-
-      commentsList.forEach((comment) => {
-        if (!commentsMap.has(comment.postId)) {
-          commentsMap.set(comment.postId, []);
+      const commentsMap = commentsList.reduce((map, comment) => {
+        if (!map.has(comment.postId)) {
+          map.set(comment.postId, []);
         }
 
-        commentsMap.get(comment.postId)?.push(comment);
-      });
+        map.get(comment.postId)?.push(comment);
+
+        return map;
+      }, new Map<string, TGetCommentByIdRespSchema[]>());
 
       const result = postsList.map((post) => ({
         ...post,
@@ -65,53 +106,6 @@ export function getPostsRepo(db: NodePgDatabase): IPostsRepo {
 
       return result;
     },
-
-    // async getPostById(postId) {
-    //   const rows = await db
-    //     .select()
-    //     .from(posts)
-    //     .where(eq(posts.id, postId))
-    //     .leftJoin(comments, eq(posts.id, comments.postId));
-
-    //   const post = rows[0]?.posts;
-
-    //   if (!post) {
-    //     return null;
-    //   }
-
-    //   const postComments = rows.map((row) => row.comments).filter((comment) => comment !== null);
-
-    //   return {
-    //     ...post,
-    //     comments: postComments
-    //   };
-    // },
-
-    // async getPosts(queries) {
-    //   const rows = await db.select()
-    //                        .from(posts)
-    //                        .leftJoin(comments, eq(posts.id, comments.postId));
-
-    //   const postsMap = new Map<string, TGetPostByIdRespSchemaExtended>();
-
-    //   rows.forEach((row) => {
-    //     const post = row.posts;
-    //     const comment = row.comments;
-
-    //     if (!postsMap.has(post.id)) {
-    //       postsMap.set(post.id, {
-    //         ...post,
-    //         comments: []
-    //       });
-    //     }
-
-    //     if (comment) {
-    //       postsMap.get(post.id)?.comments.push(comment);
-    //     }
-    //   });
-
-    //   return Array.from(postsMap.values());
-    // },
 
     async updatePost(payload, postId) {
       const [updatedPost] = await db
