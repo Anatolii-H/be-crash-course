@@ -4,7 +4,6 @@ import { and, asc, count, desc, eq, getTableColumns, gt, gte, ne, or, sql } from
 import { IPostsRepo } from 'src/types/entities/IPostsRepo';
 import { posts } from 'src/services/drizzle/schema';
 import { comments } from 'src/services/drizzle/schema';
-import { TGetPostByIdRespSchemaExtendedCommentsCount } from 'src/api/routes/schemas/posts/GetPostByIdRespSchema';
 
 export function getPostsRepo(db: NodePgDatabase): IPostsRepo {
   return {
@@ -73,8 +72,12 @@ export function getPostsRepo(db: NodePgDatabase): IPostsRepo {
       const sortColumn = sortFields[sortBy || 'createdAt'];
       const orderByClause = sortOrder === 'desc' ? desc(sortColumn) : asc(sortColumn);
 
-      const postsList: TGetPostByIdRespSchemaExtendedCommentsCount[] = await db
-        .select({ ...getTableColumns(posts), commentsCount: count(comments.id) })
+      const postsList = await db
+        .select({
+          ...getTableColumns(posts),
+          commentsCount: count(comments.id),
+          totalCount: sql<number>`cast(count(*) over() as int)`
+        })
         .from(posts)
         .where(whereClause)
         .leftJoin(comments, eq(comments.postId, posts.id))
@@ -84,7 +87,17 @@ export function getPostsRepo(db: NodePgDatabase): IPostsRepo {
         .limit(pageSize)
         .offset(isCursorPagination ? 0 : (page - 1) * pageSize);
 
-      return postsList;
+      const totalCount = postsList[0]?.totalCount ?? 0;
+
+      return {
+        data: postsList,
+        meta: {
+          totalCount,
+          totalPages: Math.ceil(totalCount / pageSize),
+          page,
+          pageSize
+        }
+      };
     },
 
     async updatePost(payload, postId) {

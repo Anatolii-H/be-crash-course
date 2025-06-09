@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import { GetCommentByIdRespSchema } from '../comments/GetCommentByIdRespSchema';
+import { PaginationMetadataSchema } from 'src/types/IPagination';
 
 export const GetPostByIdRespSchema = z.object({
   id: z.string().uuid(),
@@ -14,8 +15,13 @@ export const GetPostByIdRespSchemaExtendedComments = GetPostByIdRespSchema.exten
   comments: z.array(GetCommentByIdRespSchema)
 });
 
-export const GetPostByIdRespSchemaExtendedCommentsCount = GetPostByIdRespSchema.extend({
-  commentsCount: z.number()
+export const GetPostByIdRespSchemaExtendedMetadata = z.object({
+  data: z.array(
+    GetPostByIdRespSchema.extend({
+      commentsCount: z.number()
+    })
+  ),
+  meta: PaginationMetadataSchema
 });
 
 export const GetPostsReqQueries = z
@@ -45,7 +51,7 @@ export type TGetPostByIdRespSchema = z.infer<typeof GetPostByIdRespSchema>;
 export type TGetPostByIdRespSchemaExtendedComments = z.infer<
   typeof GetPostByIdRespSchemaExtendedComments
 >;
-export type TGetPostByIdRespSchemaExtendedCommentsCount = z.infer<
-  typeof GetPostByIdRespSchemaExtendedCommentsCount
+export type TGetPostByIdRespSchemaExtendedMetadata = z.infer<
+  typeof GetPostByIdRespSchemaExtendedMetadata
 >;
 export type TGetPostsReqQueries = z.infer<typeof GetPostsReqQueries>;
