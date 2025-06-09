@@ -1,5 +1,5 @@
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { and, asc, count, desc, eq, getTableColumns, gt, gte, or, sql } from 'drizzle-orm';
+import { and, asc, count, desc, eq, getTableColumns, gt, gte, ne, or, sql } from 'drizzle-orm';
 
 import { IPostsRepo } from 'src/types/entities/IPostsRepo';
 import { posts } from 'src/services/drizzle/schema';
@@ -54,14 +54,14 @@ export function getPostsRepo(db: NodePgDatabase): IPostsRepo {
       const whereSearchClause =
         search && search.trim() !== ''
           ? or(
-              sql`similarity(${posts.title}, ${search}) > 0.2`,
-              sql`similarity(${posts.description}, ${search}) > 0.2`
+              sql`similarity(${posts.title}, ${search}) > 0.1`,
+              sql`similarity(${posts.description}, ${search}) > 0.1`
             )
           : undefined;
 
       const whereCursorPaginationClause = isCursorPagination
         ? or(
-            gt(posts.createdAt, cursorCreatedAt),
+            and(gt(posts.createdAt, cursorCreatedAt), ne(posts.id, cursorId)),
             and(eq(posts.createdAt, cursorCreatedAt), gt(posts.id, cursorId))
           )
         : undefined;

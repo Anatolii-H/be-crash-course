@@ -15,6 +15,8 @@ export const posts = pgTable(
   (post) => [index('created_at_index').on(post.createdAt)]
 );
 
+// index('profiles_email_trgm_idx').using('gin', sql`${table.email} gin_trgm_ops`)
+
 export const comments = pgTable('comments', {
   id: uuid('id').defaultRandom().primaryKey(),
   postId: uuid('post_id')
