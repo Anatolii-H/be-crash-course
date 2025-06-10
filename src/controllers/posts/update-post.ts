@@ -1,5 +1,5 @@
 import { IPostsRepo } from 'src/types/entities/IPostsRepo';
-import { TUpdatePostReqSchema } from 'src/api/routes/schemas/posts/UpdatePostReqSchema';
+import { TUpdatePostReqSchema } from 'src/api/schemas/posts/UpdatePostReqSchema';
 import { HttpError } from 'src/api/errors/HttpError';
 
 export async function updatePost(params: {

@@ -1,11 +1,11 @@
-import { TCreatePostReqSchema } from 'src/api/routes/schemas/posts/CreatePostReqSchema';
-import { TUpdatePostReqSchema } from 'src/api/routes/schemas/posts/UpdatePostReqSchema';
+import { TCreatePostReqSchema } from 'src/api/schemas/posts/CreatePostReqSchema';
+import { TUpdatePostReqSchema } from 'src/api/schemas/posts/UpdatePostReqSchema';
 import {
   TGetPostByIdRespSchemaExtendedMetadata,
   TGetPostByIdRespSchemaExtendedComments,
   TGetPostByIdRespSchema,
   TGetPostsReqQueries
-} from 'src/api/routes/schemas/posts/GetPostByIdRespSchema';
+} from 'src/api/schemas/posts/GetPostByIdRespSchema';
 
 export interface IPostsRepo {
   createPost(payload: TCreatePostReqSchema): Promise<TGetPostByIdRespSchema>;

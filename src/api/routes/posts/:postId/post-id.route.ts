@@ -5,11 +5,11 @@ import { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { deletePost } from 'src/controllers/posts/delete-post';
 import { getPostById } from 'src/controllers/posts/get-post-by-id';
 import { updatePost } from 'src/controllers/posts/update-post';
-import { UpdatePostReqSchema } from '../../schemas/posts/UpdatePostReqSchema';
+import { UpdatePostReqSchema } from '../../../schemas/posts/UpdatePostReqSchema';
 import {
   GetPostByIdRespSchema,
   GetPostByIdRespSchemaExtendedComments
-} from '../../schemas/posts/GetPostByIdRespSchema';
+} from '../../../schemas/posts/GetPostByIdRespSchema';
 
 const routes: FastifyPluginAsync = async function (f) {
   const fastify = f.withTypeProvider<ZodTypeProvider>();

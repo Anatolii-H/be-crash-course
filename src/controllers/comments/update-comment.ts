@@ -1,5 +1,5 @@
 import { HttpError } from 'src/api/errors/HttpError';
-import { TUpdateCommentReqSchema } from 'src/api/routes/schemas/comments/UpdateCommentReqSchema';
+import { TUpdateCommentReqSchema } from 'src/api/schemas/comments/UpdateCommentReqSchema';
 import { ICommentsRepo } from 'src/types/entities/ICommentsRepo';
 
 export async function updateComment(params: {

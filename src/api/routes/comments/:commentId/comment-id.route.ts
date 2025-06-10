@@ -4,8 +4,8 @@ import { z } from 'zod';
 
 import { updateComment } from 'src/controllers/comments/update-comment';
 import { deleteComment } from 'src/controllers/comments/delete-comment';
-import { UpdateCommentReqSchema } from '../../schemas/comments/UpdateCommentReqSchema';
-import { GetCommentByIdRespSchema } from '../../schemas/comments/GetCommentByIdRespSchema';
+import { UpdateCommentReqSchema } from '../../../schemas/comments/UpdateCommentReqSchema';
+import { GetCommentByIdRespSchema } from '../../../schemas/comments/GetCommentByIdRespSchema';
 
 const routes: FastifyPluginAsync = async function (f) {
   const fastify = f.withTypeProvider<ZodTypeProvider>();

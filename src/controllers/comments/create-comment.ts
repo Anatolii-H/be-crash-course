@@ -1,4 +1,4 @@
-import { TCreateCommentReqSchema } from 'src/api/routes/schemas/comments/CreateCommentReqSchema';
+import { TCreateCommentReqSchema } from 'src/api/schemas/comments/CreateCommentReqSchema';
 import { ICommentsRepo } from 'src/types/entities/ICommentsRepo';
 
 export async function createComment(params: {
