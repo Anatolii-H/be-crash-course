@@ -29,3 +29,16 @@ export const comments = pgTable('comments', {
     .notNull()
     .$onUpdate(() => new Date())
 });
+
+export const users = pgTable('users', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  firstName: text('first_name').notNull(),
+  lastName: text('last_name').notNull(),
+  email: text('email').notNull().unique(),
+  sub: text('sub').notNull().unique(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at')
+    .defaultNow()
+    .notNull()
+    .$onUpdate(() => new Date())
+});

@@ -1,9 +1,12 @@
- 
 import 'src/services/env/env.service';
 import fastify, { FastifyInstance, FastifyLoggerOptions } from 'fastify';
 import autoload from '@fastify/autoload';
 import path from 'path';
-import { serializerCompiler, validatorCompiler, jsonSchemaTransform } from 'fastify-type-provider-zod';
+import {
+  serializerCompiler,
+  validatorCompiler,
+  jsonSchemaTransform
+} from 'fastify-type-provider-zod';
 import { getUUIDService } from 'src/services/uuid/uuid.service';
 import { errorHandler } from './errors/error.handler';
 import fastifySwagger from '@fastify/swagger';
@@ -20,6 +23,7 @@ import routePrinter from './plugins/route-printer.plugin';
 import { EErrorCodes, getErrorCodesDescription } from './errors/EErrorCodes';
 import { fastifyBasicAuth } from '@fastify/basic-auth';
 import { getDb, dbHealthCheck } from 'src/services/drizzle/drizzle.service';
+import { getAWSCognitoService } from 'src/services/cognito/cognito.service';
 
 function getLoggerOptions(): FastifyLoggerOptions {
   const localPrintOpts = {
@@ -32,11 +36,11 @@ function getLoggerOptions(): FastifyLoggerOptions {
     }
   };
 
-  const opts: FastifyLoggerOptions & {redact: string[]} = {
+  const opts: FastifyLoggerOptions & { redact: string[] } = {
     level: 'trace',
     redact: ['req.headers.authorization', 'req.headers["impersonate-authorization"]'],
     serializers: {
-      req (request) {
+      req(request) {
         return {
           ip: request.ip,
           method: request.method,
@@ -146,10 +150,15 @@ async function run() {
 
   // load context
   server.decorate('uuid', getUUIDService());
-  // server.decorate(
-  //   'identityService',
-  //   getAWSCognitoService(process.env.AWS_REGION)
-  // );
+  server.decorate(
+    'identityService',
+    getAWSCognitoService({
+      region: process.env.AWS_REGION,
+      userPoolId: process.env.COGNITO_USER_POOL_ID,
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+    })
+  );
   server.decorate(
     'db',
     getDb({
@@ -168,9 +177,7 @@ async function run() {
   // load plugins
   server.register(responseTime);
   server.register(healthCheck, {
-    healthChecksPromises: [
-      () => dbHealthCheck(server.db)
-    ],
+    healthChecksPromises: [() => dbHealthCheck(server.db)],
     path: '/api/health'
   });
   server.register(requestId);
