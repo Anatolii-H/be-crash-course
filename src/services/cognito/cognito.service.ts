@@ -1,4 +1,5 @@
 import { CognitoIdentityProvider } from '@aws-sdk/client-cognito-identity-provider';
+import { HttpError } from 'src/api/errors/HttpError';
 
 import { TSignupReqSchema } from 'src/api/schemas/auth/SignupReqSchema';
 import { ApplicationError } from 'src/types/errors/ApplicationError';
@@ -23,31 +24,37 @@ export const getAWSCognitoService = (options: {
 
   return {
     async createUser(payload: TSignupReqSchema) {
-      const createdCognitoUser = await client.adminCreateUser({
-        UserPoolId: userPoolId,
-        Username: payload.email,
-        UserAttributes: [{ Name: 'email', Value: payload.email }],
-        MessageAction: 'SUPPRESS'
-      });
+      try {
+        const createdCognitoUser = await client.adminCreateUser({
+          UserPoolId: userPoolId,
+          Username: payload.email,
+          UserAttributes: [{ Name: 'email', Value: payload.email }],
+          MessageAction: 'SUPPRESS'
+        });
 
-      if (!createdCognitoUser.User || !createdCognitoUser.User.Attributes) {
-        throw new Error('Failed to get user details from Cognito after creation.');
+        if (!createdCognitoUser.User || !createdCognitoUser.User.Attributes) {
+          throw new HttpError(404, 'Failed to get user details from Cognito after creation.');
+        }
+
+        const subAttribute = createdCognitoUser.User.Attributes.find((attr) => attr.Name === 'sub');
+
+        if (!subAttribute || !subAttribute.Value) {
+          throw new HttpError(404, "Could not find 'sub' attribute in Cognito response.");
+        }
+
+        await client.adminSetUserPassword({
+          UserPoolId: userPoolId,
+          Username: payload.email,
+          Password: payload.password,
+          Permanent: true
+        });
+
+        return subAttribute.Value;
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Unexpected error';
+
+        throw new HttpError(400, message);
       }
-
-      const subAttribute = createdCognitoUser.User.Attributes.find((attr) => attr.Name === 'sub');
-
-      if (!subAttribute || !subAttribute.Value) {
-        throw new Error("Could not find 'sub' attribute in Cognito response.");
-      }
-
-      await client.adminSetUserPassword({
-        UserPoolId: userPoolId,
-        Username: payload.email,
-        Password: payload.password,
-        Permanent: true
-      });
-
-      return subAttribute.Value;
     },
 
     async getUserByAccessToken(token: string) {

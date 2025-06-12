@@ -12,11 +12,7 @@ Metric label format will be next {error.type}_${error.cause.type}
 
 const isProduction = process.env.NODE_ENV === 'production';
 
-export const errorHandler = function (
-  error: Error,
-  request: FastifyRequest,
-  reply: FastifyReply
-) {
+export const errorHandler = function (error: Error, request: FastifyRequest, reply: FastifyReply) {
   request.log.error(error);
 
   let errorCode = EErrorCodes.GENERAL_ERROR;
@@ -40,6 +36,6 @@ export const errorHandler = function (
   return reply.status(statusCode).send({
     code: errorCode,
     message,
-    ...isProduction ? {} : { info: util.inspect(error) }
+    ...(isProduction ? {} : { info: util.inspect(error) })
   });
 };

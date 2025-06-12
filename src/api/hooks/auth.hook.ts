@@ -38,14 +38,7 @@ export const authHook: preHandlerAsyncHookHandler = async function (request) {
     }
 
     request.profile = foundUserBySubId;
-
-    request.log = request.log.child({
-      userSubId: identityUser.subId,
-      userEmail: identityUser.email,
-      userProfileId: request.profile.id
-    });
-  } catch (err) {
-    console.log('err555', err);
+  } catch {
     throw new HttpError(401, 'Unathorized');
   }
 };
