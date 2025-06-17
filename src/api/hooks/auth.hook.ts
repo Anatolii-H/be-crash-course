@@ -34,7 +34,7 @@ export const authHook: preHandlerAsyncHookHandler = async function (request) {
     const foundUserBySubId = await usersRepo.getUserBySubId(identityUser.subId);
 
     if (!foundUserBySubId) {
-      throw new HttpError(404, 'User is not found by sub id');
+      throw new HttpError(404, 'User is not found by sub id'); //
     }
 
     request.profile = foundUserBySubId;

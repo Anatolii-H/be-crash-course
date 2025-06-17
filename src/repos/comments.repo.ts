@@ -6,10 +6,10 @@ import { comments } from 'src/services/drizzle/schema';
 
 export function getCommentsRepo(db: NodePgDatabase): ICommentsRepo {
   return {
-    async createComment(payload, postId) {
+    async createComment(payload, postId, authorId) {
       const [createdComment] = await db
         .insert(comments)
-        .values({ ...payload, postId })
+        .values({ ...payload, postId, authorId })
         .returning();
 
       return createdComment;
@@ -44,6 +44,16 @@ export function getCommentsRepo(db: NodePgDatabase): ICommentsRepo {
       }
 
       return deletedComment.id;
+    },
+
+    async getCommentById(commentId) {
+      const [foundComment] = await db.select().from(comments).where(eq(comments.id, commentId));
+
+      if (!foundComment) {
+        return null;
+      }
+
+      return foundComment;
     }
   };
 }

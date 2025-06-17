@@ -7,8 +7,11 @@ import { comments } from 'src/services/drizzle/schema';
 
 export function getPostsRepo(db: NodePgDatabase): IPostsRepo {
   return {
-    async createPost(payload) {
-      const [createdPost] = await db.insert(posts).values(payload).returning();
+    async createPost(payload, authorId) {
+      const [createdPost] = await db
+        .insert(posts)
+        .values({ ...payload, authorId })
+        .returning();
 
       return createdPost;
     },

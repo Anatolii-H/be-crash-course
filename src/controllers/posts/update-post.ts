@@ -6,6 +6,7 @@ export async function updatePost(params: {
   postsRepo: IPostsRepo;
   payload: TUpdatePostReqSchema;
   postId: string;
+  authorId: string;
 }) {
   const updatedPost = await params.postsRepo.updatePost(params.payload, params.postId);
 

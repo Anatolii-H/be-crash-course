@@ -10,7 +10,8 @@ export const posts = pgTable(
     updatedAt: timestamp('updated_at')
       .defaultNow()
       .notNull()
-      .$onUpdate(() => new Date())
+      .$onUpdate(() => new Date()),
+    authorId: uuid('author_id').references(() => users.id, { onDelete: 'cascade' })
   },
   (post) => [index('created_at_index').on(post.createdAt)]
 );
@@ -27,7 +28,8 @@ export const comments = pgTable('comments', {
   updatedAt: timestamp('updated_at')
     .defaultNow()
     .notNull()
-    .$onUpdate(() => new Date())
+    .$onUpdate(() => new Date()),
+  authorId: uuid('author_id').references(() => users.id, { onDelete: 'cascade' })
 });
 
 export const users = pgTable('users', {

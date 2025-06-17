@@ -8,7 +8,7 @@ import {
 } from 'src/api/schemas/posts/GetPostByIdRespSchema';
 
 export interface IPostsRepo {
-  createPost(payload: TCreatePostReqSchema): Promise<TGetPostByIdRespSchema>;
+  createPost(payload: TCreatePostReqSchema, authorId: string): Promise<TGetPostByIdRespSchema>;
   getPostById(postId: string): Promise<TGetPostByIdRespSchemaExtendedComments | null>;
   getPosts(queries: TGetPostsReqQueries): Promise<TGetPostByIdRespSchemaExtendedMetadata>;
   updatePost(payload: TUpdatePostReqSchema, postId: string): Promise<TGetPostByIdRespSchema | null>;

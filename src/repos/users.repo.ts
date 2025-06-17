@@ -12,7 +12,7 @@ export function getUsersRepo(db: NodePgDatabase): IUsersRepo {
         .values({ ...payload, sub })
         .returning();
 
-      return createdUser;
+      return createdUser; // validate in repos
     },
 
     async getUserById(id: string) {

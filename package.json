@@ -12,7 +12,8 @@
     "lint:fix": "eslint --fix .",
     "db:migration:run": "npx drizzle-kit migrate",
     "db:migration:generate": "npx drizzle-kit generate",
-    "db:migration:studio": "npx drizzle-kit studio"
+    "db:migration:studio": "npx drizzle-kit studio",
+    "db:backfill": "ts-node -r dotenv/config ./src/scripts/backfill-authors.ts"
   },
   "keywords": [],
   "author": "",

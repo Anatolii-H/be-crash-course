@@ -5,7 +5,8 @@ import { TUpdateCommentReqSchema } from 'src/api/schemas/comments/UpdateCommentR
 export interface ICommentsRepo {
   createComment(
     payload: TCreateCommentReqSchema,
-    postId: string
+    postId: string,
+    authorId: string
   ): Promise<TGetCommentByIdRespSchema>;
   getCommentsByPostId(postId: string): Promise<TGetCommentByIdRespSchema[]>;
   updateComment(
@@ -13,4 +14,5 @@ export interface ICommentsRepo {
     commentId: string
   ): Promise<TGetCommentByIdRespSchema | null>;
   deleteComment(commentId: string): Promise<string | null>;
+  getCommentById(commentId: string): Promise<TGetCommentByIdRespSchema | null>;
 }

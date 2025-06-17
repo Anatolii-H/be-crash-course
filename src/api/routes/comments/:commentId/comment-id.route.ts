@@ -6,6 +6,7 @@ import { updateComment } from 'src/controllers/comments/update-comment';
 import { deleteComment } from 'src/controllers/comments/delete-comment';
 import { UpdateCommentReqSchema } from '../../../schemas/comments/UpdateCommentReqSchema';
 import { GetCommentByIdRespSchema } from '../../../schemas/comments/GetCommentByIdRespSchema';
+import { commentsPermissionHook } from 'src/api/hooks/comments-permission.hook';
 
 const routes: FastifyPluginAsync = async function (f) {
   const fastify = f.withTypeProvider<ZodTypeProvider>();
@@ -21,7 +22,8 @@ const routes: FastifyPluginAsync = async function (f) {
           commentId: z.string().uuid()
         }),
         body: UpdateCommentReqSchema
-      }
+      },
+      preHandler: commentsPermissionHook
     },
     async (request) => {
       return updateComment({
@@ -39,7 +41,8 @@ const routes: FastifyPluginAsync = async function (f) {
         params: z.object({
           commentId: z.string().uuid()
         })
-      }
+      },
+      preHandler: commentsPermissionHook
     },
     async (request, reply) => {
       await deleteComment({

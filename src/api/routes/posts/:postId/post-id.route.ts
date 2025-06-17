@@ -10,6 +10,7 @@ import {
   GetPostByIdRespSchema,
   GetPostByIdRespSchemaExtendedComments
 } from '../../../schemas/posts/GetPostByIdRespSchema';
+import { postsPermissionHook } from 'src/api/hooks/posts-permission.hook';
 
 const routes: FastifyPluginAsync = async function (f) {
   const fastify = f.withTypeProvider<ZodTypeProvider>();
@@ -42,13 +43,15 @@ const routes: FastifyPluginAsync = async function (f) {
         response: {
           200: GetPostByIdRespSchema
         }
-      }
+      },
+      preHandler: postsPermissionHook
     },
     async (request) => {
       return updatePost({
         postsRepo: fastify.repos.postsRepo,
         payload: request.body,
-        postId: request.params.postId
+        postId: request.params.postId,
+        authorId: request.profile?.id as string
       });
     }
   );
@@ -60,7 +63,8 @@ const routes: FastifyPluginAsync = async function (f) {
         params: z.object({
           postId: z.string().uuid()
         })
-      }
+      },
+      preHandler: postsPermissionHook
     },
     async (request, reply) => {
       await deletePost({ postsRepo: fastify.repos.postsRepo, postId: request.params.postId });

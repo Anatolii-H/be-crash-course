@@ -8,7 +8,8 @@ export const GetPostByIdRespSchema = z.object({
   title: z.string(),
   description: z.string(),
   createdAt: z.date(),
-  updatedAt: z.date()
+  updatedAt: z.date(),
+  authorId: z.string().uuid().nullable()
 });
 
 export const GetPostByIdRespSchemaExtendedComments = GetPostByIdRespSchema.extend({

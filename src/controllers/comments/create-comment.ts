@@ -5,6 +5,7 @@ export async function createComment(params: {
   commentsRepo: ICommentsRepo;
   payload: TCreateCommentReqSchema;
   postId: string;
+  authorId: string;
 }) {
-  return params.commentsRepo.createComment(params.payload, params.postId);
+  return params.commentsRepo.createComment(params.payload, params.postId, params.authorId);
 }

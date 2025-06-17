@@ -28,7 +28,7 @@ export const getAWSCognitoService = (options: {
         const createdCognitoUser = await client.adminCreateUser({
           UserPoolId: userPoolId,
           Username: payload.email,
-          UserAttributes: [{ Name: 'email', Value: payload.email }],
+          UserAttributes: [{ Name: 'email', Value: payload.email }, { Name: 'email_verified', Value: 'true' }],
           MessageAction: 'SUPPRESS'
         });
 
