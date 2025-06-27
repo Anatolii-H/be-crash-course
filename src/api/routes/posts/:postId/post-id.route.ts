@@ -8,7 +8,7 @@ import { updatePost } from 'src/controllers/posts/update-post';
 import { UpdatePostReqSchema } from '../../../schemas/posts/UpdatePostReqSchema';
 import {
   GetPostByIdRespSchema,
-  GetPostByIdRespSchemaExtendedComments
+  GetPostByIdRespSchemaExtended
 } from '../../../schemas/posts/GetPostByIdRespSchema';
 import { postsPermissionHook } from 'src/api/hooks/posts-permission.hook';
 
@@ -20,7 +20,7 @@ const routes: FastifyPluginAsync = async function (f) {
     {
       schema: {
         response: {
-          200: GetPostByIdRespSchemaExtendedComments
+          200: GetPostByIdRespSchemaExtended
         },
         params: z.object({
           postId: z.string().uuid()

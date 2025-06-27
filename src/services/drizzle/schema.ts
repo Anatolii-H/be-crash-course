@@ -1,4 +1,7 @@
-import { pgTable, uuid, text, timestamp, index } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
+import { pgTable, uuid, text, timestamp, index, pgEnum, boolean } from 'drizzle-orm/pg-core';
+
+export const userRoleEnum = pgEnum('user_role', ['admin', 'user']);
 
 export const posts = pgTable(
   'posts',
@@ -11,7 +14,9 @@ export const posts = pgTable(
       .defaultNow()
       .notNull()
       .$onUpdate(() => new Date()),
-    authorId: uuid('author_id').references(() => users.id, { onDelete: 'cascade' })
+    authorId: uuid('author_id')
+      .references(() => users.id, { onDelete: 'cascade' })
+      .notNull()
   },
   (post) => [index('created_at_index').on(post.createdAt)]
 );
@@ -29,18 +34,31 @@ export const comments = pgTable('comments', {
     .defaultNow()
     .notNull()
     .$onUpdate(() => new Date()),
-  authorId: uuid('author_id').references(() => users.id, { onDelete: 'cascade' })
+  authorId: uuid('author_id')
+    .references(() => users.id, { onDelete: 'cascade' })
+    .notNull()
 });
 
-export const users = pgTable('users', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  firstName: text('first_name').notNull(),
-  lastName: text('last_name').notNull(),
-  email: text('email').notNull().unique(),
-  sub: text('sub').notNull().unique(),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at')
-    .defaultNow()
-    .notNull()
-    .$onUpdate(() => new Date())
-});
+export const users = pgTable(
+  'users',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    firstName: text('first_name').notNull(),
+    lastName: text('last_name').notNull(),
+    email: text('email').notNull().unique(),
+    sub: text('sub').notNull().unique(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    role: userRoleEnum('role').default('user').notNull(),
+    isDisabled: boolean('is_disabled').default(false).notNull(),
+    updatedAt: timestamp('updated_at')
+      .defaultNow()
+      .notNull()
+      .$onUpdate(() => new Date())
+  },
+
+  (user) => [
+    index('user_first_name_trgm_index').using('gin', sql`${user.firstName} gin_trgm_ops`),
+    index('user_last_name_trgm_index').using('gin', sql`${user.lastName} gin_trgm_ops`),
+    index('user_email_trgm_index').using('gin', sql`${user.email} gin_trgm_ops`)
+  ]
+);

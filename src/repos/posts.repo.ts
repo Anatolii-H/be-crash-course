@@ -2,8 +2,13 @@ import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { and, asc, count, desc, eq, getTableColumns, gt, gte, ne, or, sql } from 'drizzle-orm';
 
 import { IPostsRepo } from 'src/types/entities/IPostsRepo';
-import { posts } from 'src/services/drizzle/schema';
+import { posts, users } from 'src/services/drizzle/schema';
 import { comments } from 'src/services/drizzle/schema';
+import {
+  GetPostByIdRespSchema,
+  GetPostByIdRespSchemaExtended,
+  GetPostByIdRespSchemaExtendedMetadata
+} from 'src/api/schemas/posts/GetPostByIdRespSchema';
 
 export function getPostsRepo(db: NodePgDatabase): IPostsRepo {
   return {
@@ -13,22 +18,46 @@ export function getPostsRepo(db: NodePgDatabase): IPostsRepo {
         .values({ ...payload, authorId })
         .returning();
 
-      return createdPost;
+      return GetPostByIdRespSchema.parse(createdPost);
     },
 
     async getPostById(postId) {
-      const [post] = await db.select().from(posts).where(eq(posts.id, postId));
+      const results = await db
+        .select()
+        .from(posts)
+        .leftJoin(users, eq(posts.authorId, users.id))
+        .where(eq(posts.id, postId));
 
-      if (!post) {
+      if (!results.length) {
         return null;
       }
 
-      const commentsForPost = await db.select().from(comments).where(eq(comments.postId, postId));
+      const { posts: postData, users: authorData } = results[0];
 
-      return {
-        ...post,
-        comments: commentsForPost
-      };
+      if (!authorData) {
+        return null;
+      }
+
+      const commentsForPost = await db
+        .select()
+        .from(comments)
+        .leftJoin(users, eq(comments.authorId, users.id))
+        .where(eq(comments.postId, postId));
+
+      const commentsWithAuthors = commentsForPost.map((result) => {
+        const { comments: commentData, users: commentAuthorData } = result;
+
+        return {
+          ...commentData,
+          author: commentAuthorData
+        };
+      });
+
+      return GetPostByIdRespSchemaExtended.parse({
+        ...postData,
+        author: authorData,
+        comments: commentsWithAuthors
+      });
     },
 
     async getPosts(queries) {
@@ -92,7 +121,7 @@ export function getPostsRepo(db: NodePgDatabase): IPostsRepo {
 
       const totalCount = postsList[0]?.totalCount ?? 0;
 
-      return {
+      return GetPostByIdRespSchemaExtendedMetadata.parse({
         data: postsList,
         meta: {
           totalCount,
@@ -100,7 +129,7 @@ export function getPostsRepo(db: NodePgDatabase): IPostsRepo {
           page,
           pageSize
         }
-      };
+      });
     },
 
     async updatePost(payload, postId) {
@@ -114,7 +143,7 @@ export function getPostsRepo(db: NodePgDatabase): IPostsRepo {
         return null;
       }
 
-      return updatedPost;
+      return GetPostByIdRespSchema.parse(updatedPost);
     },
 
     async deletePost(postId) {

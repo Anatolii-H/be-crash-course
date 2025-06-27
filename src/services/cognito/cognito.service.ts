@@ -28,7 +28,10 @@ export const getAWSCognitoService = (options: {
         const createdCognitoUser = await client.adminCreateUser({
           UserPoolId: userPoolId,
           Username: payload.email,
-          UserAttributes: [{ Name: 'email', Value: payload.email }, { Name: 'email_verified', Value: 'true' }],
+          UserAttributes: [
+            { Name: 'email', Value: payload.email },
+            { Name: 'email_verified', Value: 'true' }
+          ],
           MessageAction: 'SUPPRESS'
         });
 
@@ -110,6 +113,28 @@ export const getAWSCognitoService = (options: {
         return IdentityUserSchema.parse({
           subId: rawUserData!.sub,
           email: rawUserData!.email
+        });
+      } catch (err) {
+        throw new ApplicationError('Cognito error', err);
+      }
+    },
+
+    async disableUser(email: string) {
+      try {
+        await client.adminDisableUser({
+          UserPoolId: userPoolId,
+          Username: email
+        });
+      } catch (err) {
+        throw new ApplicationError('Cognito error', err);
+      }
+    },
+
+    async enableUser(email: string) {
+      try {
+        await client.adminEnableUser({
+          UserPoolId: userPoolId,
+          Username: email
         });
       } catch (err) {
         throw new ApplicationError('Cognito error', err);

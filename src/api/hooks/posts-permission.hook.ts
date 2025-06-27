@@ -11,7 +11,10 @@ export const postsPermissionHook: preHandlerAsyncHookHandler = async function (r
     throw new HttpError(404, 'Post not found');
   }
 
-  if (post.authorId !== userId) {
-    throw new HttpError(403, 'Forbidden: You are not the author');
+  const isOwner = post.author.id === userId;
+  const isAdmin = request.profile?.role === 'admin';
+
+  if (!isOwner && !isAdmin) {
+    throw new HttpError(403, 'Forbidden: You are not the author or an admin');
   }
 };

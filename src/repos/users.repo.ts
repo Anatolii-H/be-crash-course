@@ -1,6 +1,11 @@
-import { eq } from 'drizzle-orm';
+import { eq, getTableColumns, or, sql } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
+
 import { users } from 'src/services/drizzle/schema';
+import {
+  UserSchema,
+  UserSchemaExtendedMetadata
+} from 'src/api/schemas/users/GetUserByIdRespSchema';
 
 import { IUsersRepo } from 'src/types/entities/IUsersRepo';
 
@@ -12,7 +17,7 @@ export function getUsersRepo(db: NodePgDatabase): IUsersRepo {
         .values({ ...payload, sub })
         .returning();
 
-      return createdUser; // validate in repos
+      return UserSchema.parse(createdUser);
     },
 
     async getUserById(id: string) {
@@ -22,7 +27,7 @@ export function getUsersRepo(db: NodePgDatabase): IUsersRepo {
         return null;
       }
 
-      return user;
+      return UserSchema.parse(user);
     },
 
     async getUserBySubId(subId: string) {
@@ -32,7 +37,56 @@ export function getUsersRepo(db: NodePgDatabase): IUsersRepo {
         return null;
       }
 
-      return user;
+      return UserSchema.parse(user);
+    },
+
+    async getUsers(queries) {
+      const { page, pageSize, search } = queries;
+
+      const whereSearchClause =
+        search && search.trim() !== ''
+          ? or(
+              sql`similarity(${users.firstName}, ${search}) > 0.1`,
+              sql`similarity(${users.lastName}, ${search}) > 0.1`,
+              sql`similarity(${users.email}, ${search}) > 0.1`
+            )
+          : undefined;
+
+      const usersList = await db
+        .select({
+          ...getTableColumns(users),
+          totalCount: sql<number>`cast(count(*) over() as int)`
+        })
+        .from(users)
+        .where(whereSearchClause)
+        .limit(pageSize)
+        .offset((page - 1) * pageSize);
+
+      const totalCount = usersList[0]?.totalCount ?? 0;
+
+      return UserSchemaExtendedMetadata.parse({
+        data: usersList,
+        meta: {
+          totalCount,
+          totalPages: Math.ceil(totalCount / pageSize),
+          page,
+          pageSize
+        }
+      });
+    },
+
+    async updateUser(userId, payload) {
+      const [updatedUser] = await db
+        .update(users)
+        .set(payload)
+        .where(eq(users.id, userId))
+        .returning();
+
+      if (!updatedUser) {
+        return null;
+      }
+
+      return UserSchema.parse(updatedUser);
     }
   };
 }

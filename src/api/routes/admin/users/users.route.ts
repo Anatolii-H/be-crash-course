@@ -1,8 +1,11 @@
 import { FastifyPluginAsync } from 'fastify';
 import { ZodTypeProvider } from 'fastify-type-provider-zod';
 
-import { getUserById } from 'src/controllers/users/get-user-by-id';
-import { UserSchema } from 'src/api/schemas/users/GetUserByIdRespSchema';
+import { getUsers } from 'src/controllers/users/get-users';
+import {
+  GetUsersReqQueries,
+  UserSchemaExtendedMetadata
+} from 'src/api/schemas/users/GetUserByIdRespSchema';
 
 const routes: FastifyPluginAsync = async function (f) {
   const fastify = f.withTypeProvider<ZodTypeProvider>();
@@ -11,15 +14,16 @@ const routes: FastifyPluginAsync = async function (f) {
     '/',
     {
       schema: {
+        querystring: GetUsersReqQueries,
         response: {
-          200: UserSchema
+          200: UserSchemaExtendedMetadata
         }
       }
     },
     async (request) => {
-      return getUserById({
+      return getUsers({
         usersRepo: fastify.repos.usersRepo,
-        userId: request.profile?.id as string
+        queries: request.query
       });
     }
   );

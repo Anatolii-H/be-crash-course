@@ -3,6 +3,7 @@ import { eq } from 'drizzle-orm';
 
 import { ICommentsRepo } from 'src/types/entities/ICommentsRepo';
 import { comments } from 'src/services/drizzle/schema';
+import { GetCommentByIdRespSchema } from 'src/api/schemas/comments/GetCommentByIdRespSchema';
 
 export function getCommentsRepo(db: NodePgDatabase): ICommentsRepo {
   return {
@@ -12,7 +13,7 @@ export function getCommentsRepo(db: NodePgDatabase): ICommentsRepo {
         .values({ ...payload, postId, authorId })
         .returning();
 
-      return createdComment;
+      return GetCommentByIdRespSchema.parse(createdComment);
     },
 
     async getCommentsByPostId(postId) {
@@ -30,7 +31,7 @@ export function getCommentsRepo(db: NodePgDatabase): ICommentsRepo {
         return null;
       }
 
-      return updatedComment;
+      return GetCommentByIdRespSchema.parse(updatedComment);
     },
 
     async deleteComment(commentId) {
@@ -53,7 +54,7 @@ export function getCommentsRepo(db: NodePgDatabase): ICommentsRepo {
         return null;
       }
 
-      return foundComment;
+      return GetCommentByIdRespSchema.parse(foundComment);
     }
   };
 }

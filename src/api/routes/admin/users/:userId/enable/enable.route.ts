@@ -1,25 +1,29 @@
 import { FastifyPluginAsync } from 'fastify';
 import { ZodTypeProvider } from 'fastify-type-provider-zod';
+import { z } from 'zod';
 
-import { getUserById } from 'src/controllers/users/get-user-by-id';
-import { UserSchema } from 'src/api/schemas/users/GetUserByIdRespSchema';
+import { enableUser } from 'src/controllers/users/enable-user';
 
 const routes: FastifyPluginAsync = async function (f) {
   const fastify = f.withTypeProvider<ZodTypeProvider>();
 
-  fastify.get(
+  fastify.post(
     '/',
     {
       schema: {
+        params: z.object({
+          userId: z.string().uuid()
+        }),
         response: {
-          200: UserSchema
+          200: z.boolean()
         }
       }
     },
     async (request) => {
-      return getUserById({
+      return enableUser({
+        identityService: fastify.identityService,
         usersRepo: fastify.repos.usersRepo,
-        userId: request.profile?.id as string
+        userId: request.params.userId
       });
     }
   );

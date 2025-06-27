@@ -1,7 +1,8 @@
 import { z } from 'zod';
 
-import { GetCommentByIdRespSchema } from '../comments/GetCommentByIdRespSchema';
+import { GetCommentByIdRespSchemaExtended } from '../comments/GetCommentByIdRespSchema';
 import { PaginationMetadataSchema } from 'src/types/IPagination';
+import { UserSchema } from '../users/GetUserByIdRespSchema';
 
 export const GetPostByIdRespSchema = z.object({
   id: z.string().uuid(),
@@ -12,8 +13,9 @@ export const GetPostByIdRespSchema = z.object({
   authorId: z.string().uuid().nullable()
 });
 
-export const GetPostByIdRespSchemaExtendedComments = GetPostByIdRespSchema.extend({
-  comments: z.array(GetCommentByIdRespSchema)
+export const GetPostByIdRespSchemaExtended = GetPostByIdRespSchema.omit({ authorId: true }).extend({
+  author: UserSchema,
+  comments: z.array(GetCommentByIdRespSchemaExtended)
 });
 
 export const GetPostByIdRespSchemaExtendedMetadata = z.object({
@@ -49,9 +51,7 @@ export const GetPostsReqQueries = z
   );
 
 export type TGetPostByIdRespSchema = z.infer<typeof GetPostByIdRespSchema>;
-export type TGetPostByIdRespSchemaExtendedComments = z.infer<
-  typeof GetPostByIdRespSchemaExtendedComments
->;
+export type TGetPostByIdRespSchemaExtended = z.infer<typeof GetPostByIdRespSchemaExtended>;
 export type TGetPostByIdRespSchemaExtendedMetadata = z.infer<
   typeof GetPostByIdRespSchemaExtendedMetadata
 >;

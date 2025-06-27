@@ -4,7 +4,7 @@ import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { IIdentityService } from 'src/types/IIdentityService';
 import { IMailService } from 'src/types/IMailService';
 import { IdentityUser } from 'src/types/IdentityUser';
-import { TUserSchema } from './UserSchema';
+import { TUserSchema } from 'src/api/schemas/users/GetUserByIdRespSchema';
 import { IStorageService } from './IStorageService';
 
 // set context type

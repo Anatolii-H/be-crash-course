@@ -5,4 +5,6 @@ export interface IIdentityService {
   createUser(payload: TSignupReqSchema): Promise<string>;
   getUserByAccessToken(token: string): Promise<IdentityUser>;
   getUserBySubId(subId: string): Promise<IdentityUser>;
+  disableUser(email: string): Promise<void>;
+  enableUser(email: string): Promise<void>;
 }

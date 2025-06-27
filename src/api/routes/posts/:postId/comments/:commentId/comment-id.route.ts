@@ -4,8 +4,8 @@ import { z } from 'zod';
 
 import { updateComment } from 'src/controllers/comments/update-comment';
 import { deleteComment } from 'src/controllers/comments/delete-comment';
-import { UpdateCommentReqSchema } from '../../../schemas/comments/UpdateCommentReqSchema';
-import { GetCommentByIdRespSchema } from '../../../schemas/comments/GetCommentByIdRespSchema';
+import { UpdateCommentReqSchema } from 'src/api/schemas/comments/UpdateCommentReqSchema';
+import { GetCommentByIdRespSchema } from 'src/api/schemas/comments/GetCommentByIdRespSchema';
 import { commentsPermissionHook } from 'src/api/hooks/comments-permission.hook';
 
 const routes: FastifyPluginAsync = async function (f) {
@@ -19,7 +19,8 @@ const routes: FastifyPluginAsync = async function (f) {
           200: GetCommentByIdRespSchema
         },
         params: z.object({
-          commentId: z.string().uuid()
+          commentId: z.string().uuid(),
+          postId: z.string().uuid()
         }),
         body: UpdateCommentReqSchema
       },
@@ -39,7 +40,8 @@ const routes: FastifyPluginAsync = async function (f) {
     {
       schema: {
         params: z.object({
-          commentId: z.string().uuid()
+          commentId: z.string().uuid(),
+          postId: z.string().uuid()
         })
       },
       preHandler: commentsPermissionHook
