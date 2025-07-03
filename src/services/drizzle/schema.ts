@@ -48,7 +48,8 @@ export const users = pgTable(
     email: text('email').notNull().unique(),
     sub: text('sub').notNull().unique(),
     createdAt: timestamp('created_at').defaultNow().notNull(),
-    role: userRoleEnum('role').default('user').notNull(),
+    role: text('role').default('user').notNull(),
+    isPending: boolean('is_pending').default(false).notNull(),
     isDisabled: boolean('is_disabled').default(false).notNull(),
     updatedAt: timestamp('updated_at')
       .defaultNow()

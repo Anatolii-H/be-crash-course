@@ -15,7 +15,8 @@ export async function createUser(params: {
     {
       email: payload.email,
       firstName: payload.firstName,
-      lastName: payload.lastName
+      lastName: payload.lastName,
+      isPending: false
     },
     sub
   );

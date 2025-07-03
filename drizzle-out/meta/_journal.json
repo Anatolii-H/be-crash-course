@@ -127,6 +127,20 @@
       "when": 1750966131319,
       "tag": "0017_omniscient_rictor",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1751573743219,
+      "tag": "0018_easy_namor",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1751575094693,
+      "tag": "0019_conscious_shard",
+      "breakpoints": true
     }
   ]
 }

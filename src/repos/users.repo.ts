@@ -30,6 +30,16 @@ export function getUsersRepo(db: NodePgDatabase): IUsersRepo {
       return UserSchema.parse(user);
     },
 
+    async getUserByEmail(email: string) {
+      const [user] = await db.select().from(users).where(eq(users.email, email));
+
+      if (!user) {
+        return null;
+      }
+
+      return UserSchema.parse(user);
+    },
+
     async getUserBySubId(subId: string) {
       const [user] = await db.select().from(users).where(eq(users.sub, subId));
 

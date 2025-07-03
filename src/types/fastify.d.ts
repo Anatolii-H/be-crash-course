@@ -6,6 +6,7 @@ import { IMailService } from 'src/types/IMailService';
 import { IdentityUser } from 'src/types/IdentityUser';
 import { TUserSchema } from 'src/api/schemas/users/GetUserByIdRespSchema';
 import { IStorageService } from './IStorageService';
+import { ISignatureService } from './ISignatureService';
 
 // set context type
 declare module 'fastify' {
@@ -14,6 +15,7 @@ declare module 'fastify' {
     db: NodePgDatabase;
     repos: IRepos;
     identityService: IIdentityService;
+    signatureService: ISignatureService;
     mailService: IMailService;
     storageService: IStorageService;
   }

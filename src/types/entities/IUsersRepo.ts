@@ -1,5 +1,4 @@
-import { TSignupReqSchema } from 'src/api/schemas/auth/SignupReqSchema';
-import { TSignupRespSchema } from 'src/api/schemas/auth/SignupRespSchema';
+import { TSignupReqSchemaWithIsPending } from 'src/api/schemas/auth/SignupReqSchema';
 import {
   TGetUsersReqQueries,
   TUserSchema,
@@ -7,7 +6,11 @@ import {
 } from 'src/api/schemas/users/GetUserByIdRespSchema';
 
 export interface IUsersRepo {
-  createUser(payload: Omit<TSignupReqSchema, 'password'>, sub: string): Promise<TSignupRespSchema>;
+  createUser(
+    payload: Omit<TSignupReqSchemaWithIsPending, 'password'>,
+    sub: string
+  ): Promise<TUserSchema>;
+  getUserByEmail(email: string): Promise<TUserSchema | null>;
   getUserById(id: string): Promise<TUserSchema | null>;
   getUserBySubId(id: string): Promise<TUserSchema | null>;
   getUsers(queries: TGetUsersReqQueries): Promise<TUserSchemaExtendedMetadata>;
