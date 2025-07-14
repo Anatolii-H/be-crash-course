@@ -1,7 +1,7 @@
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { and, asc, count, desc, eq, getTableColumns, gt, gte, ne, or, sql } from 'drizzle-orm';
 
-import { IPostsRepo } from 'src/types/entities/IPostsRepo';
+import { IPostsRepo } from 'src/types/repos/IPostsRepo';
 import { posts, users } from 'src/services/drizzle/schema';
 import { comments } from 'src/services/drizzle/schema';
 import {

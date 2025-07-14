@@ -10,6 +10,7 @@ export const UserSchema = z.object({
   createdAt: z.date(),
   updatedAt: z.date(),
   role: z.enum(['admin', 'user']),
+  isPending: z.boolean(),
   isDisabled: z.boolean()
 });
 

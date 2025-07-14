@@ -1,6 +1,6 @@
 import { TSignupReqSchema } from 'src/api/schemas/auth/SignupReqSchema';
-import { IUsersRepo } from 'src/types/entities/IUsersRepo';
-import { IIdentityService } from 'src/types/IIdentityService';
+import { IUsersRepo } from 'src/types/repos/IUsersRepo';
+import { IIdentityService } from 'src/types/services/IIdentityService';
 
 export async function createUser(params: {
   usersRepo: IUsersRepo;
@@ -15,7 +15,8 @@ export async function createUser(params: {
     {
       email: payload.email,
       firstName: payload.firstName,
-      lastName: payload.lastName
+      lastName: payload.lastName,
+      isPending: false
     },
     sub
   );

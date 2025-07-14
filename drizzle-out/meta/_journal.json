@@ -127,6 +127,34 @@
       "when": 1750966131319,
       "tag": "0017_omniscient_rictor",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1751573743219,
+      "tag": "0018_easy_namor",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1751575094693,
+      "tag": "0019_conscious_shard",
+      "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1751609715434,
+      "tag": "0020_crazy_rick_jones",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1751609739310,
+      "tag": "0021_gigantic_falcon",
+      "breakpoints": true
     }
   ]
 }

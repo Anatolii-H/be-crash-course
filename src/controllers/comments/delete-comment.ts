@@ -1,5 +1,5 @@
 import { HttpError } from 'src/api/errors/HttpError';
-import { ICommentsRepo } from 'src/types/entities/ICommentsRepo';
+import { ICommentsRepo } from 'src/types/repos/ICommentsRepo';
 
 export async function deleteComment(params: { commentsRepo: ICommentsRepo; commentId: string }) {
   const deletedComment = await params.commentsRepo.deleteComment(params.commentId);

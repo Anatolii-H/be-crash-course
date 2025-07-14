@@ -1,7 +1,7 @@
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { eq } from 'drizzle-orm';
 
-import { ICommentsRepo } from 'src/types/entities/ICommentsRepo';
+import { ICommentsRepo } from 'src/types/repos/ICommentsRepo';
 import { comments } from 'src/services/drizzle/schema';
 import { GetCommentByIdRespSchema } from 'src/api/schemas/comments/GetCommentByIdRespSchema';
 

@@ -7,7 +7,7 @@ import {
   UserSchemaExtendedMetadata
 } from 'src/api/schemas/users/GetUserByIdRespSchema';
 
-import { IUsersRepo } from 'src/types/entities/IUsersRepo';
+import { IUsersRepo } from 'src/types/repos/IUsersRepo';
 
 export function getUsersRepo(db: NodePgDatabase): IUsersRepo {
   return {
@@ -22,6 +22,16 @@ export function getUsersRepo(db: NodePgDatabase): IUsersRepo {
 
     async getUserById(id: string) {
       const [user] = await db.select().from(users).where(eq(users.id, id));
+
+      if (!user) {
+        return null;
+      }
+
+      return UserSchema.parse(user);
+    },
+
+    async getUserByEmail(email: string) {
+      const [user] = await db.select().from(users).where(eq(users.email, email));
 
       if (!user) {
         return null;

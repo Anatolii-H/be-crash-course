@@ -23,7 +23,9 @@ import routePrinter from './plugins/route-printer.plugin';
 import { EErrorCodes, getErrorCodesDescription } from './errors/EErrorCodes';
 import { fastifyBasicAuth } from '@fastify/basic-auth';
 import { getDb, dbHealthCheck } from 'src/services/drizzle/drizzle.service';
-import { getAWSCognitoService } from 'src/services/cognito/cognito.service';
+import { getAWSCognitoService } from 'src/services/aws/cognito/cognito.service';
+import { getAWSKmsService } from 'src/services/aws/kms/kms.service';
+import { getMailService } from 'src/services/sendgrid/sendgrid.service';
 
 function getLoggerOptions(): FastifyLoggerOptions {
   const localPrintOpts = {
@@ -150,14 +152,11 @@ async function run() {
 
   // load context
   server.decorate('uuid', getUUIDService());
+  server.decorate('mailService', getMailService({ apiKey: process.env.SENDGRID_API_KEY }));
+  server.decorate('signatureService', getAWSKmsService({ kmsKeyId: process.env.KMS_KEY_ID }));
   server.decorate(
     'identityService',
-    getAWSCognitoService({
-      region: process.env.AWS_REGION,
-      userPoolId: process.env.COGNITO_USER_POOL_ID,
-      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
-    })
+    getAWSCognitoService({ userPoolId: process.env.COGNITO_USER_POOL_ID })
   );
   server.decorate(
     'db',

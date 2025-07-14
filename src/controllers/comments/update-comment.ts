@@ -1,6 +1,6 @@
 import { HttpError } from 'src/api/errors/HttpError';
 import { TUpdateCommentReqSchema } from 'src/api/schemas/comments/UpdateCommentReqSchema';
-import { ICommentsRepo } from 'src/types/entities/ICommentsRepo';
+import { ICommentsRepo } from 'src/types/repos/ICommentsRepo';
 
 export async function updateComment(params: {
   commentsRepo: ICommentsRepo;

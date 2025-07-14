@@ -1,0 +1,1 @@
+ALTER TABLE "users" RENAME COLUMN "invite_status" TO "is_pending";

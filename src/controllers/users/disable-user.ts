@@ -1,6 +1,6 @@
 import { HttpError } from 'src/api/errors/HttpError';
-import { IUsersRepo } from 'src/types/entities/IUsersRepo';
-import { IIdentityService } from 'src/types/IIdentityService';
+import { IUsersRepo } from 'src/types/repos/IUsersRepo';
+import { IIdentityService } from 'src/types/services/IIdentityService';
 
 export async function disableUser(params: {
   userId: string;

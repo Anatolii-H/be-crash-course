@@ -1,29 +1,38 @@
 import { CognitoIdentityProvider } from '@aws-sdk/client-cognito-identity-provider';
 import { HttpError } from 'src/api/errors/HttpError';
 
-import { TSignupReqSchema } from 'src/api/schemas/auth/SignupReqSchema';
 import { ApplicationError } from 'src/types/errors/ApplicationError';
 import { IdentityUserSchema } from 'src/types/IdentityUser';
-import { IIdentityService } from 'src/types/IIdentityService';
+import { IIdentityService } from 'src/types/services/IIdentityService';
 
-export const getAWSCognitoService = (options: {
-  region: string;
-  userPoolId: string;
-  accessKeyId: string;
-  secretAccessKey: string;
-}): IIdentityService => {
-  const { region, userPoolId, accessKeyId, secretAccessKey } = options;
+export const getAWSCognitoService = (options: { userPoolId: string }): IIdentityService => {
+  const { userPoolId } = options;
 
-  const client = new CognitoIdentityProvider({
-    region,
-    credentials: {
-      accessKeyId,
-      secretAccessKey
-    }
-  });
+  const client = new CognitoIdentityProvider();
 
   return {
-    async createUser(payload: TSignupReqSchema) {
+    async setUserPassword(payload) {
+      try {
+        await client.adminSetUserPassword({
+          UserPoolId: userPoolId,
+          Username: payload.email,
+          Password: payload.password,
+          Permanent: true
+        });
+      } catch (err) {
+        throw new ApplicationError('Cognito adminSetUserPassword error', err);
+      }
+    },
+
+    async createUser(payload) {
+      const subId = await this.createUserWithoutPassword(payload);
+
+      await this.setUserPassword(payload);
+
+      return subId;
+    },
+
+    async createUserWithoutPassword(payload) {
       try {
         const createdCognitoUser = await client.adminCreateUser({
           UserPoolId: userPoolId,
@@ -44,13 +53,6 @@ export const getAWSCognitoService = (options: {
         if (!subAttribute || !subAttribute.Value) {
           throw new HttpError(404, "Could not find 'sub' attribute in Cognito response.");
         }
-
-        await client.adminSetUserPassword({
-          UserPoolId: userPoolId,
-          Username: payload.email,
-          Password: payload.password,
-          Permanent: true
-        });
 
         return subAttribute.Value;
       } catch (err) {
@@ -89,7 +91,7 @@ export const getAWSCognitoService = (options: {
     async getUserBySubId(subId: string) {
       try {
         const result = await client.listUsers({
-          UserPoolId: process.env.COGNITO_USER_POOL_ID,
+          UserPoolId: userPoolId,
           Filter: `sub = "${subId}"`
         });
 

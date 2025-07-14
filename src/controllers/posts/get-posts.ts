@@ -1,4 +1,4 @@
-import { IPostsRepo } from 'src/types/entities/IPostsRepo';
+import { IPostsRepo } from 'src/types/repos/IPostsRepo';
 import { TGetPostsReqQueries } from 'src/api/schemas/posts/GetPostByIdRespSchema';
 
 export async function getPosts(params: { postsRepo: IPostsRepo; queries: TGetPostsReqQueries }) {

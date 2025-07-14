@@ -1,5 +1,5 @@
 import { TCreateCommentReqSchema } from 'src/api/schemas/comments/CreateCommentReqSchema';
-import { ICommentsRepo } from 'src/types/entities/ICommentsRepo';
+import { ICommentsRepo } from 'src/types/repos/ICommentsRepo';
 
 export async function createComment(params: {
   commentsRepo: ICommentsRepo;

@@ -1,4 +1,4 @@
-import { IPostsRepo } from 'src/types/entities/IPostsRepo';
+import { IPostsRepo } from 'src/types/repos/IPostsRepo';
 import { TUpdatePostReqSchema } from 'src/api/schemas/posts/UpdatePostReqSchema';
 import { HttpError } from 'src/api/errors/HttpError';
 

@@ -1,7 +1,5 @@
 import { sql } from 'drizzle-orm';
-import { pgTable, uuid, text, timestamp, index, pgEnum, boolean } from 'drizzle-orm/pg-core';
-
-export const userRoleEnum = pgEnum('user_role', ['admin', 'user']);
+import { pgTable, uuid, text, timestamp, index, boolean } from 'drizzle-orm/pg-core';
 
 export const posts = pgTable(
   'posts',
@@ -48,11 +46,12 @@ export const users = pgTable(
     email: text('email').notNull().unique(),
     sub: text('sub').notNull().unique(),
     createdAt: timestamp('created_at').defaultNow().notNull(),
-    role: userRoleEnum('role').default('user').notNull(),
+    role: text('role').default('user').notNull(),
+    isPending: boolean('is_pending').default(false).notNull(),
     isDisabled: boolean('is_disabled').default(false).notNull(),
     updatedAt: timestamp('updated_at')
-      .defaultNow()
-      .notNull()
+      .default(sql`NULL`)
+      // .notNull()
       .$onUpdate(() => new Date())
   },
 

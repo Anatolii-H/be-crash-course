@@ -1,5 +1,5 @@
 import { HttpError } from 'src/api/errors/HttpError';
-import { IUsersRepo } from 'src/types/entities/IUsersRepo';
+import { IUsersRepo } from 'src/types/repos/IUsersRepo';
 
 export async function getUserById(params: { usersRepo: IUsersRepo; userId: string }) {
   const { usersRepo, userId } = params;

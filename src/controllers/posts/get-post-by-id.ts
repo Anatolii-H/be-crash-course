@@ -1,5 +1,5 @@
 import { HttpError } from 'src/api/errors/HttpError';
-import { IPostsRepo } from 'src/types/entities/IPostsRepo';
+import { IPostsRepo } from 'src/types/repos/IPostsRepo';
 
 export async function getPostById(params: { postsRepo: IPostsRepo; postId: string }) {
   const foundPost = await params.postsRepo.getPostById(params.postId);
