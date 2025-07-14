@@ -2,7 +2,7 @@ import { FastifyPluginAsync } from 'fastify';
 import { ZodTypeProvider } from 'fastify-type-provider-zod';
 
 import { UserInviteReqSchema } from 'src/api/schemas/auth/UserInviteReqSchema';
-import { createPendingUserAndSendEmailInvite } from 'src/controllers/auth/create-pending-user-and-send-email-invite';
+import { createPendingUserAndSendEmailInvite } from 'src/controllers/users/create-pending-user-and-send-email-invite';
 import { concatenateUrlParts } from 'src/api/helpers';
 
 const routes: FastifyPluginAsync = async function (f) {

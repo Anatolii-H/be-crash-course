@@ -3,7 +3,7 @@ import { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { z } from 'zod';
 
 import { concatenateUrlParts } from 'src/api/helpers';
-import { resendEmailInvite } from 'src/controllers/auth/resend-email-invite';
+import { resendEmailInvite } from 'src/controllers/users/resend-email-invite';
 
 const routes: FastifyPluginAsync = async function (f) {
   const fastify = f.withTypeProvider<ZodTypeProvider>();
