@@ -37,6 +37,7 @@ export function getAWSKmsService(options: { kmsKeyId: string }): ISignatureServi
     },
 
     async verify(options) {
+      console.log('options', options);
       try {
         const message = `${options.email}:${options.expiresAt}`;
         const messageBuffer = Buffer.from(message);

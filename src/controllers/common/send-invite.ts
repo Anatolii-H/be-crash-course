@@ -20,9 +20,13 @@ export async function sendInvite(options: {
     tokenTTLInMillis
   } = options;
 
-  const expireInMillis = Date.now() + tokenTTLInMillis;
+  const expireInMillis = Date.now() + Number(tokenTTLInMillis);
   const token = await signatureService.sign({ email: toEmail, expiresAt: String(expireInMillis) });
   const url = `${baseUrl}?email=${toEmail}&expireAt=${expireInMillis}&signature=${token}`;
+
+  console.log('Date.now()', Date.now());
+  console.log('tokenTTLInMillis', tokenTTLInMillis);
+  console.log('expireInMillis', expireInMillis);
 
   await mailService.send({
     from: fromEmail,
