@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { GetCommentByIdRespSchemaExtended } from '../comments/GetCommentByIdRespSchema';
 import { PaginationMetadataSchema } from 'src/types/IPagination';
 import { UserSchema } from '../users/GetUserByIdRespSchema';
+import { GetTagByIdRespSchema } from '../tags/GetTagByIdRespSchema';
 
 export const GetPostByIdRespSchema = z.object({
   id: z.string().uuid(),
@@ -15,13 +16,15 @@ export const GetPostByIdRespSchema = z.object({
 
 export const GetPostByIdRespSchemaExtended = GetPostByIdRespSchema.omit({ authorId: true }).extend({
   author: UserSchema,
-  comments: z.array(GetCommentByIdRespSchemaExtended)
+  comments: z.array(GetCommentByIdRespSchemaExtended),
+  tags: z.array(GetTagByIdRespSchema)
 });
 
 export const GetPostByIdRespSchemaExtendedMetadata = z.object({
   data: z.array(
     GetPostByIdRespSchema.extend({
-      commentsCount: z.number()
+      commentsCount: z.number(),
+      tags: z.array(GetTagByIdRespSchema)
     })
   ),
   meta: PaginationMetadataSchema
@@ -36,7 +39,17 @@ export const GetPostsReqQueries = z
     search: z.string().optional().default(''),
     sortBy: z.enum(['title', 'createdAt', 'commentsCount']).optional(),
     sortOrder: z.enum(['asc', 'desc']).optional(),
-    minCommentsCount: z.coerce.number().min(0).optional()
+    minCommentsCount: z.coerce.number().min(0).optional(),
+    tagIds: z
+      .union([z.string(), z.array(z.string())])
+      .optional()
+      .transform((val) => {
+        if (!val) {
+          return [];
+        }
+
+        return Array.isArray(val) ? val : [val];
+      })
   })
   .refine(
     (data) => {

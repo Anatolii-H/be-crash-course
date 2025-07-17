@@ -1,5 +1,40 @@
 import { sql } from 'drizzle-orm';
-import { pgTable, uuid, text, timestamp, index, boolean } from 'drizzle-orm/pg-core';
+import {
+  pgTable,
+  uuid,
+  text,
+  timestamp,
+  index,
+  boolean,
+  varchar,
+  uniqueIndex
+} from 'drizzle-orm/pg-core';
+
+export const tags = pgTable('tags', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  name: varchar({ length: 255 }).notNull().unique(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at')
+    .defaultNow()
+    .notNull()
+    .$onUpdate(() => new Date())
+});
+
+export const postsToTags = pgTable(
+  'posts_to_tags',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    postId: uuid('post_id')
+      .notNull()
+      .references(() => posts.id, { onDelete: 'cascade' }),
+    tagId: uuid('tag_id')
+      .notNull()
+      .references(() => tags.id, { onDelete: 'cascade' })
+  },
+  (table) => {
+    return [uniqueIndex('post_tag_unique').on(table.postId, table.tagId)];
+  }
+);
 
 export const posts = pgTable(
   'posts',
@@ -50,8 +85,8 @@ export const users = pgTable(
     isPending: boolean('is_pending').default(false).notNull(),
     isDisabled: boolean('is_disabled').default(false).notNull(),
     updatedAt: timestamp('updated_at')
-      .default(sql`NULL`)
-      // .notNull()
+      .defaultNow()
+      .notNull()
       .$onUpdate(() => new Date())
   },
 

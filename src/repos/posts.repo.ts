@@ -1,24 +1,51 @@
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { and, asc, count, desc, eq, getTableColumns, gt, gte, ne, or, sql } from 'drizzle-orm';
+import {
+  and,
+  asc,
+  count,
+  desc,
+  eq,
+  getTableColumns,
+  gt,
+  gte,
+  inArray,
+  ne,
+  or,
+  sql
+} from 'drizzle-orm';
 
 import { IPostsRepo } from 'src/types/repos/IPostsRepo';
-import { posts, users } from 'src/services/drizzle/schema';
+import { posts, postsToTags, tags, users } from 'src/services/drizzle/schema';
 import { comments } from 'src/services/drizzle/schema';
 import {
   GetPostByIdRespSchema,
   GetPostByIdRespSchemaExtended,
   GetPostByIdRespSchemaExtendedMetadata
 } from 'src/api/schemas/posts/GetPostByIdRespSchema';
+import { TGetTagByIdRespSchema } from 'src/api/schemas/tags/GetTagByIdRespSchema';
 
 export function getPostsRepo(db: NodePgDatabase): IPostsRepo {
   return {
     async createPost(payload, authorId) {
-      const [createdPost] = await db
-        .insert(posts)
-        .values({ ...payload, authorId })
-        .returning();
+      const [newPost] = await db.transaction(async (tx) => {
+        const [createdPost] = await tx
+          .insert(posts)
+          .values({ ...payload, authorId })
+          .returning();
 
-      return GetPostByIdRespSchema.parse(createdPost);
+        if (payload.tagIds.length > 0) {
+          const tagsToInsert = payload.tagIds.map((tagId) => ({
+            postId: createdPost.id,
+            tagId
+          }));
+
+          await tx.insert(postsToTags).values(tagsToInsert);
+        }
+
+        return [createdPost];
+      });
+
+      return GetPostByIdRespSchema.parse(newPost);
     },
 
     async getPostById(postId) {
@@ -53,10 +80,17 @@ export function getPostsRepo(db: NodePgDatabase): IPostsRepo {
         };
       });
 
+      const tagsForPost = await db
+        .select({ ...getTableColumns(tags) })
+        .from(tags)
+        .innerJoin(postsToTags, eq(tags.id, postsToTags.tagId))
+        .where(eq(postsToTags.postId, postId));
+
       return GetPostByIdRespSchemaExtended.parse({
         ...postData,
         author: authorData,
-        comments: commentsWithAuthors
+        comments: commentsWithAuthors,
+        tags: tagsForPost
       });
     },
 
@@ -69,7 +103,8 @@ export function getPostsRepo(db: NodePgDatabase): IPostsRepo {
         cursorId,
         sortBy,
         sortOrder,
-        minCommentsCount
+        minCommentsCount,
+        tagIds
       } = queries;
 
       const sortFields = {
@@ -82,13 +117,12 @@ export function getPostsRepo(db: NodePgDatabase): IPostsRepo {
 
       const havingClause = minCommentsCount ? gte(count(comments.id), minCommentsCount) : undefined;
 
-      const whereSearchClause =
-        search && search.trim() !== ''
-          ? or(
-              sql`similarity(${posts.title}, ${search}) > 0.1`,
-              sql`similarity(${posts.description}, ${search}) > 0.1`
-            )
-          : undefined;
+      const whereSearchClause = search?.trim()
+        ? or(
+            sql`similarity(${posts.title}, ${search}) > 0.1`,
+            sql`similarity(${posts.description}, ${search}) > 0.1`
+          )
+        : undefined;
 
       const whereCursorPaginationClause = isCursorPagination
         ? or(
@@ -111,8 +145,9 @@ export function getPostsRepo(db: NodePgDatabase): IPostsRepo {
           totalCount: sql<number>`cast(count(*) over() as int)`
         })
         .from(posts)
-        .where(whereClause)
         .leftJoin(comments, eq(comments.postId, posts.id))
+        .leftJoin(postsToTags, eq(posts.id, postsToTags.postId))
+        .where(and(whereClause, tagIds?.length ? inArray(postsToTags.tagId, tagIds) : undefined))
         .groupBy(posts.id)
         .having(havingClause)
         .orderBy(orderByClause)
@@ -121,8 +156,48 @@ export function getPostsRepo(db: NodePgDatabase): IPostsRepo {
 
       const totalCount = postsList[0]?.totalCount ?? 0;
 
+      const postIds = postsList.map((p) => p.id);
+
+      if (!postIds.length) {
+        return GetPostByIdRespSchemaExtendedMetadata.parse({
+          data: [],
+          meta: {
+            totalCount: 0,
+            totalPages: 0,
+            page,
+            pageSize
+          }
+        });
+      }
+
+      const tagsForPosts = await db
+        .select({
+          postId: postsToTags.postId,
+          ...getTableColumns(tags)
+        })
+        .from(postsToTags)
+        .innerJoin(tags, eq(tags.id, postsToTags.tagId))
+        .where(inArray(postsToTags.postId, postIds));
+
+      const tagsMap = new Map<string, TGetTagByIdRespSchema[]>();
+
+      for (const row of tagsForPosts) {
+        const { postId, ...tag } = row;
+
+        if (!tagsMap.has(postId)) {
+          tagsMap.set(postId, []);
+        }
+
+        tagsMap.get(postId)!.push(tag);
+      }
+
+      const enrichedPosts = postsList.map((post) => ({
+        ...post,
+        tags: tagsMap.get(post.id) ?? []
+      }));
+
       return GetPostByIdRespSchemaExtendedMetadata.parse({
-        data: postsList,
+        data: enrichedPosts,
         meta: {
           totalCount,
           totalPages: Math.ceil(totalCount / pageSize),
@@ -133,11 +208,34 @@ export function getPostsRepo(db: NodePgDatabase): IPostsRepo {
     },
 
     async updatePost(payload, postId) {
-      const [updatedPost] = await db
-        .update(posts)
-        .set(payload)
-        .where(eq(posts.id, postId))
-        .returning();
+      const { tagIds, ...postPayload } = payload;
+
+      const [updatedPost] = await db.transaction(async (tx) => {
+        const [updated] = await tx
+          .update(posts)
+          .set(postPayload)
+          .where(eq(posts.id, postId))
+          .returning();
+
+        if (!updated) {
+          tx.rollback();
+
+          return [];
+        }
+
+        await tx.delete(postsToTags).where(eq(postsToTags.postId, postId));
+
+        if (tagIds.length > 0) {
+          const tagsToInsert = tagIds.map((tagId) => ({
+            postId,
+            tagId
+          }));
+
+          await tx.insert(postsToTags).values(tagsToInsert);
+        }
+
+        return [updated];
+      });
 
       if (!updatedPost) {
         return null;
