@@ -23,9 +23,6 @@ export async function acceptInvite(options: {
     throw new HttpError(400, 'User is already active');
   }
 
-  console.log('data.expireAt', data.expireAt);
-  console.log('Date.now()', Date.now());
-
   if (data.expireAt < Date.now()) {
     throw new HttpError(400, 'Invite is expired');
   }

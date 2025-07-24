@@ -12,8 +12,6 @@ export function getMailService(options: { apiKey: string }): IMailService {
       const { to, from, templateId, vars } = options;
       vars.firstName = 'Test';
 
-      console.log('vars', vars);
-
       await sgMail.send({
         to,
         from,

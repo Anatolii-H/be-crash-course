@@ -51,7 +51,8 @@ const routes: FastifyPluginAsync = async function (f) {
         postsRepo: fastify.repos.postsRepo,
         payload: request.body,
         postId: request.params.postId,
-        authorId: request.profile?.id as string
+        transactionManager: fastify.transactionManager,
+        postsToTagsRepo: fastify.repos.postsToTagsRepo
       });
     }
   );

@@ -24,10 +24,6 @@ export async function sendInvite(options: {
   const token = await signatureService.sign({ email: toEmail, expiresAt: String(expireInMillis) });
   const url = `${baseUrl}?email=${toEmail}&expireAt=${expireInMillis}&signature=${token}`;
 
-  console.log('Date.now()', Date.now());
-  console.log('tokenTTLInMillis', tokenTTLInMillis);
-  console.log('expireInMillis', expireInMillis);
-
   await mailService.send({
     from: fromEmail,
     to: toEmail,

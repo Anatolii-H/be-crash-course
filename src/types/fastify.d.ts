@@ -7,6 +7,7 @@ import { IdentityUser } from 'src/types/IdentityUser';
 import { TUserSchema } from 'src/api/schemas/users/GetUserByIdRespSchema';
 import { IStorageService } from './services/IStorageService';
 import { ISignatureService } from './services/ISignatureService';
+import { ITransactionManager } from './ITransaction';
 
 // set context type
 declare module 'fastify' {
@@ -18,6 +19,7 @@ declare module 'fastify' {
     signatureService: ISignatureService;
     mailService: IMailService;
     storageService: IStorageService;
+    transactionManager: ITransactionManager;
   }
 
   interface FastifyRequest {

@@ -1,18 +1,36 @@
 import { IPostsRepo } from 'src/types/repos/IPostsRepo';
 import { TUpdatePostReqSchema } from 'src/api/schemas/posts/UpdatePostReqSchema';
 import { HttpError } from 'src/api/errors/HttpError';
+import { ITransactionManager } from 'src/types/ITransaction';
+import { IPostsToTagsRepo } from 'src/types/repos/IPostsToTagsRepo';
 
 export async function updatePost(params: {
   postsRepo: IPostsRepo;
+  postsToTagsRepo: IPostsToTagsRepo;
   payload: TUpdatePostReqSchema;
   postId: string;
-  authorId: string;
+  transactionManager: ITransactionManager;
 }) {
-  const updatedPost = await params.postsRepo.updatePost(params.payload, params.postId);
+  const { payload, postId, postsRepo, postsToTagsRepo, transactionManager } = params;
 
-  if (!updatedPost) {
-    throw new HttpError(404, 'Cannot update: post not found');
-  }
+  return transactionManager.execute(async ({ sharedTx }) => {
+    const updatedPost = await postsRepo.updatePost(payload, postId, sharedTx);
 
-  return updatedPost;
+    if (!updatedPost) {
+      throw new HttpError(404, 'Cannot update post: post not found');
+    }
+
+    await postsToTagsRepo.deleteTagsForPost(postId, sharedTx);
+
+    if (payload.tagIds.length > 0) {
+      const tagsToInsert = payload.tagIds.map((tagId) => ({
+        postId,
+        tagId
+      }));
+
+      await postsToTagsRepo.createPostsToTagsRelation(tagsToInsert, sharedTx);
+    }
+
+    return updatedPost;
+  });
 }

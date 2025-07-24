@@ -26,26 +26,15 @@ import { TGetTagByIdRespSchema } from 'src/api/schemas/tags/GetTagByIdRespSchema
 
 export function getPostsRepo(db: NodePgDatabase): IPostsRepo {
   return {
-    async createPost(payload, authorId) {
-      const [newPost] = await db.transaction(async (tx) => {
-        const [createdPost] = await tx
-          .insert(posts)
-          .values({ ...payload, authorId })
-          .returning();
+    async createPost(payload, authorId, tx) {
+      db = tx || db;
 
-        if (payload.tagIds.length > 0) {
-          const tagsToInsert = payload.tagIds.map((tagId) => ({
-            postId: createdPost.id,
-            tagId
-          }));
+      const [createdPost] = await db
+        .insert(posts)
+        .values({ ...payload, authorId })
+        .returning();
 
-          await tx.insert(postsToTags).values(tagsToInsert);
-        }
-
-        return [createdPost];
-      });
-
-      return GetPostByIdRespSchema.parse(newPost);
+      return GetPostByIdRespSchema.parse(createdPost);
     },
 
     async getPostById(postId) {
@@ -207,35 +196,16 @@ export function getPostsRepo(db: NodePgDatabase): IPostsRepo {
       });
     },
 
-    async updatePost(payload, postId) {
+    async updatePost(payload, postId, tx) {
+      db = tx || db;
+
       const { tagIds, ...postPayload } = payload;
 
-      const [updatedPost] = await db.transaction(async (tx) => {
-        const [updated] = await tx
-          .update(posts)
-          .set(postPayload)
-          .where(eq(posts.id, postId))
-          .returning();
-
-        if (!updated) {
-          tx.rollback();
-
-          return [];
-        }
-
-        await tx.delete(postsToTags).where(eq(postsToTags.postId, postId));
-
-        if (tagIds.length > 0) {
-          const tagsToInsert = tagIds.map((tagId) => ({
-            postId,
-            tagId
-          }));
-
-          await tx.insert(postsToTags).values(tagsToInsert);
-        }
-
-        return [updated];
-      });
+      const [updatedPost] = await db
+        .update(posts)
+        .set(postPayload)
+        .where(eq(posts.id, postId))
+        .returning();
 
       if (!updatedPost) {
         return null;

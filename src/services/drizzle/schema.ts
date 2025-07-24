@@ -7,7 +7,8 @@ import {
   index,
   boolean,
   varchar,
-  uniqueIndex
+  uniqueIndex,
+  jsonb
 } from 'drizzle-orm/pg-core';
 
 export const tags = pgTable('tags', {
@@ -49,7 +50,8 @@ export const posts = pgTable(
       .$onUpdate(() => new Date()),
     authorId: uuid('author_id')
       .references(() => users.id, { onDelete: 'cascade' })
-      .notNull()
+      .notNull(),
+    deletedAt: timestamp('deleted_at', { withTimezone: true })
   },
   (post) => [index('created_at_index').on(post.createdAt)]
 );
@@ -69,7 +71,8 @@ export const comments = pgTable('comments', {
     .$onUpdate(() => new Date()),
   authorId: uuid('author_id')
     .references(() => users.id, { onDelete: 'cascade' })
-    .notNull()
+    .notNull(),
+  deletedAt: timestamp('deleted_at', { withTimezone: true })
 });
 
 export const users = pgTable(
@@ -87,7 +90,8 @@ export const users = pgTable(
     updatedAt: timestamp('updated_at')
       .defaultNow()
       .notNull()
-      .$onUpdate(() => new Date())
+      .$onUpdate(() => new Date()),
+    deletedAt: timestamp('deleted_at', { withTimezone: true })
   },
 
   (user) => [
@@ -96,3 +100,10 @@ export const users = pgTable(
     index('user_email_trgm_index').using('gin', sql`${user.email} gin_trgm_ops`)
   ]
 );
+
+export const archive = pgTable('archived_users', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  archivedAt: timestamp('archived_at').defaultNow().notNull(),
+  entityType: varchar({ length: 50 }).notNull(),
+  data: jsonb('data').notNull()
+});

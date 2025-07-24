@@ -26,6 +26,7 @@ import { getDb, dbHealthCheck } from 'src/services/drizzle/drizzle.service';
 import { getAWSCognitoService } from 'src/services/aws/cognito/cognito.service';
 import { getAWSKmsService } from 'src/services/aws/kms/kms.service';
 import { getMailService } from 'src/services/sendgrid/sendgrid.service';
+import { getTransactionManager } from 'src/services/drizzle/drizzle.service';
 
 function getLoggerOptions(): FastifyLoggerOptions {
   const localPrintOpts = {
@@ -170,6 +171,7 @@ async function run() {
     })
   );
   server.decorate('repos', getRepos(server.db));
+  server.decorate('transactionManager', getTransactionManager(server.db));
 
   server.register(autoTagging);
 
