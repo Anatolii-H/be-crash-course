@@ -137,7 +137,9 @@ export function getPostsRepo(db: NodePgDatabase): IPostsRepo {
 
       const isCursorPagination = cursorCreatedAt && cursorId;
 
-      const havingClause = minCommentsCount ? gte(count(comments.id), minCommentsCount) : undefined;
+      const havingClause = minCommentsCount
+        ? gte(countDistinct(comments.id), minCommentsCount)
+        : undefined;
 
       const whereSearchClause = search?.trim()
         ? or(
