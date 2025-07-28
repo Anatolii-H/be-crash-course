@@ -4,6 +4,7 @@ import {
   TUserSchema,
   TUserSchemaExtendedMetadata
 } from 'src/api/schemas/users/GetUserByIdRespSchema';
+import { TTransaction } from '../ITransaction';
 
 export interface IUsersRepo {
   createUser(
@@ -11,8 +12,20 @@ export interface IUsersRepo {
     sub: string
   ): Promise<TUserSchema>;
   getUserByEmail(email: string): Promise<TUserSchema | null>;
-  getUserById(id: string): Promise<TUserSchema | null>;
+  getUserById(options: {
+    userId: string;
+    tx?: TTransaction;
+    skipDeleted?: boolean;
+  }): Promise<TUserSchema | null>;
   getUserBySubId(id: string): Promise<TUserSchema | null>;
   getUsers(queries: TGetUsersReqQueries): Promise<TUserSchemaExtendedMetadata>;
-  updateUser(userId: string, payload: Partial<TUserSchema>): Promise<TUserSchema | null>;
+  updateUser(
+    userId: string,
+    payload: Partial<TUserSchema>,
+    tx?: TTransaction
+  ): Promise<TUserSchema | null>;
+  softDeleteUser(userId: string, tx?: TTransaction): Promise<boolean>;
+  deleteUser(userId: string, tx?: TTransaction): Promise<boolean>;
+  restoreSoftDeletedUser(userId: string, tx?: TTransaction): Promise<boolean>;
+  getSoftDeletedUsers(userId: string, tx?: TTransaction): Promise<TUserSchema[]>;
 }

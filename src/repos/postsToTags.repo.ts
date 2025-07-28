@@ -7,17 +7,17 @@ import { IPostsToTagsRepo } from 'src/types/repos/IPostsToTagsRepo';
 export function getPostsToTagsRepo(db: NodePgDatabase): IPostsToTagsRepo {
   return {
     async createPostsToTagsRelation(payload, tx) {
-      db = tx || db;
+      const executor = tx || db;
 
-      const createdPostsToTags = await db.insert(postsToTags).values(payload).returning();
+      const createdPostsToTags = await executor.insert(postsToTags).values(payload).returning();
 
       return PostsToTagsSchema.array().parse(createdPostsToTags);
     },
 
     async deleteTagsForPost(postId, tx) {
-      db = tx || db;
+      const executor = tx || db;
 
-      await db.delete(postsToTags).where(eq(postsToTags.postId, postId));
+      await executor.delete(postsToTags).where(eq(postsToTags.postId, postId));
     }
   };
 }

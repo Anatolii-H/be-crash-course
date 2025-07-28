@@ -7,7 +7,9 @@ export const GetCommentByIdRespSchema = z.object({
   text: z.string(),
   createdAt: z.date(),
   updatedAt: z.date(),
-  authorId: z.string().uuid().nullable()
+  authorId: z.string().uuid(),
+  deletedAt: z.date().nullable(),
+  postId: z.string().uuid()
 });
 
 export const GetCommentByIdRespSchemaExtended = GetCommentByIdRespSchema.omit({

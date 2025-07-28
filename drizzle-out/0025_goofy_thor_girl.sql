@@ -1,0 +1,1 @@
+ALTER TABLE "archive" DROP CONSTRAINT "archive_entityId_unique";

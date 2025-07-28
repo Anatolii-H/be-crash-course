@@ -14,7 +14,10 @@ export async function disableUser(params: {
     throw new HttpError(400, 'You cannot disable yourself');
   }
 
-  const user = await params.usersRepo.getUserById(userId);
+  const user = await params.usersRepo.getUserById({
+    userId,
+    skipDeleted: true
+  });
 
   if (!user) {
     throw new HttpError(404, 'User not found');

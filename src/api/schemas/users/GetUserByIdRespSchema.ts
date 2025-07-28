@@ -11,7 +11,8 @@ export const UserSchema = z.object({
   updatedAt: z.date(),
   role: z.enum(['admin', 'user']),
   isPending: z.boolean(),
-  isDisabled: z.boolean()
+  isDisabled: z.boolean(),
+  deletedAt: z.date().nullable()
 });
 
 export const UserSchemaExtendedMetadata = z.object({

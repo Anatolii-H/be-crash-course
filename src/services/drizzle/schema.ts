@@ -101,9 +101,10 @@ export const users = pgTable(
   ]
 );
 
-export const archive = pgTable('archived_users', {
+export const archive = pgTable('archive', {
   id: uuid('id').defaultRandom().primaryKey(),
   archivedAt: timestamp('archived_at').defaultNow().notNull(),
   entityType: varchar({ length: 50 }).notNull(),
+  entityId: uuid().notNull().unique(),
   data: jsonb('data').notNull()
 });

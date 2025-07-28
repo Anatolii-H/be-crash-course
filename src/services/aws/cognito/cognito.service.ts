@@ -132,6 +132,17 @@ export const getAWSCognitoService = (options: { userPoolId: string }): IIdentity
       }
     },
 
+    async deleteUser(email: string) {
+      try {
+        await client.adminDeleteUser({
+          UserPoolId: userPoolId,
+          Username: email
+        });
+      } catch (err) {
+        throw new ApplicationError('Cognito error', err);
+      }
+    },
+
     async enableUser(email: string) {
       try {
         await client.adminEnableUser({

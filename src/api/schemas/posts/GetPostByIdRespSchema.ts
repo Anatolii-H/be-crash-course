@@ -11,7 +11,12 @@ export const GetPostByIdRespSchema = z.object({
   description: z.string(),
   createdAt: z.date(),
   updatedAt: z.date(),
-  authorId: z.string().uuid().nullable()
+  authorId: z.string().uuid(),
+  deletedAt: z.date().nullable()
+});
+
+export const GetPostByIdRespSchemaWithTags = GetPostByIdRespSchema.extend({
+  tags: z.array(GetTagByIdRespSchema)
 });
 
 export const GetPostByIdRespSchemaExtended = GetPostByIdRespSchema.omit({ authorId: true }).extend({
@@ -69,3 +74,4 @@ export type TGetPostByIdRespSchemaExtendedMetadata = z.infer<
   typeof GetPostByIdRespSchemaExtendedMetadata
 >;
 export type TGetPostsReqQueries = z.infer<typeof GetPostsReqQueries>;
+export type TGetPostByIdRespSchemaWithTags = z.infer<typeof GetPostByIdRespSchemaWithTags>;

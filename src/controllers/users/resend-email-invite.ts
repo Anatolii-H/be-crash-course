@@ -25,7 +25,7 @@ export async function resendEmailInvite(options: {
     userId
   } = options;
 
-  const existingUser = await userProfilesRepo.getUserById(userId);
+  const existingUser = await userProfilesRepo.getUserById({ userId });
 
   if (!existingUser) {
     throw new HttpError(404, 'User not found');

@@ -9,4 +9,5 @@ export interface IIdentityService {
   getUserBySubId(subId: string): Promise<IdentityUser>;
   disableUser(email: string): Promise<void>;
   enableUser(email: string): Promise<void>;
+  deleteUser(email: string): Promise<void>;
 }

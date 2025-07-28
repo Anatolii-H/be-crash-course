@@ -9,9 +9,12 @@ import {
   gt,
   gte,
   inArray,
+  isNotNull,
+  isNull,
   ne,
   or,
-  sql
+  sql,
+  countDistinct
 } from 'drizzle-orm';
 
 import { IPostsRepo } from 'src/types/repos/IPostsRepo';
@@ -24,12 +27,16 @@ import {
 } from 'src/api/schemas/posts/GetPostByIdRespSchema';
 import { TGetTagByIdRespSchema } from 'src/api/schemas/tags/GetTagByIdRespSchema';
 
+function isPostNotDeleted() {
+  return isNull(posts.deletedAt);
+}
+
 export function getPostsRepo(db: NodePgDatabase): IPostsRepo {
   return {
     async createPost(payload, authorId, tx) {
-      db = tx || db;
+      const executor = tx || db;
 
-      const [createdPost] = await db
+      const [createdPost] = await executor
         .insert(posts)
         .values({ ...payload, authorId })
         .returning();
@@ -37,12 +44,20 @@ export function getPostsRepo(db: NodePgDatabase): IPostsRepo {
       return GetPostByIdRespSchema.parse(createdPost);
     },
 
+    async createBulkPosts(payload, tx) {
+      const executor = tx || db;
+
+      const createdPosts = await executor.insert(posts).values(payload).returning();
+
+      return Boolean(createdPosts.length);
+    },
+
     async getPostById(postId) {
       const results = await db
         .select()
         .from(posts)
         .leftJoin(users, eq(posts.authorId, users.id))
-        .where(eq(posts.id, postId));
+        .where(and(eq(posts.id, postId), isPostNotDeleted()));
 
       if (!results.length) {
         return null;
@@ -58,7 +73,7 @@ export function getPostsRepo(db: NodePgDatabase): IPostsRepo {
         .select()
         .from(comments)
         .leftJoin(users, eq(comments.authorId, users.id))
-        .where(eq(comments.postId, postId));
+        .where(and(eq(comments.postId, postId), isNull(comments.deletedAt)));
 
       const commentsWithAuthors = commentsForPost.map((result) => {
         const { comments: commentData, users: commentAuthorData } = result;
@@ -81,6 +96,24 @@ export function getPostsRepo(db: NodePgDatabase): IPostsRepo {
         comments: commentsWithAuthors,
         tags: tagsForPost
       });
+    },
+
+    async getAllPostIdsByAuthorId(authorId, tx) {
+      const executor = tx || db;
+
+      return executor
+        .select({ id: posts.id })
+        .from(posts)
+        .where(and(eq(posts.authorId, authorId), isPostNotDeleted()));
+    },
+
+    async getAllSoftDeletedPostIdsByAuthorId(authorId, tx) {
+      const executor = tx || db;
+
+      return executor
+        .select({ id: posts.id })
+        .from(posts)
+        .where(and(eq(posts.authorId, authorId), isNotNull(posts.deletedAt)));
     },
 
     async getPosts(queries) {
@@ -130,13 +163,19 @@ export function getPostsRepo(db: NodePgDatabase): IPostsRepo {
       const postsList = await db
         .select({
           ...getTableColumns(posts),
-          commentsCount: count(comments.id),
+          commentsCount: countDistinct(comments.id),
           totalCount: sql<number>`cast(count(*) over() as int)`
         })
         .from(posts)
-        .leftJoin(comments, eq(comments.postId, posts.id))
+        .leftJoin(comments, and(eq(comments.postId, posts.id), isNull(comments.deletedAt)))
         .leftJoin(postsToTags, eq(posts.id, postsToTags.postId))
-        .where(and(whereClause, tagIds?.length ? inArray(postsToTags.tagId, tagIds) : undefined))
+        .where(
+          and(
+            whereClause,
+            tagIds?.length ? inArray(postsToTags.tagId, tagIds) : undefined,
+            isPostNotDeleted()
+          )
+        )
         .groupBy(posts.id)
         .having(havingClause)
         .orderBy(orderByClause)
@@ -197,14 +236,14 @@ export function getPostsRepo(db: NodePgDatabase): IPostsRepo {
     },
 
     async updatePost(payload, postId, tx) {
-      db = tx || db;
+      const executor = tx || db;
 
       const { tagIds, ...postPayload } = payload;
 
-      const [updatedPost] = await db
+      const [updatedPost] = await executor
         .update(posts)
         .set(postPayload)
-        .where(eq(posts.id, postId))
+        .where(and(eq(posts.id, postId), isPostNotDeleted()))
         .returning();
 
       if (!updatedPost) {
@@ -225,6 +264,54 @@ export function getPostsRepo(db: NodePgDatabase): IPostsRepo {
       }
 
       return deletedPost.id;
+    },
+
+    async softDeletePostsByAuthorId(authorId, tx) {
+      const executor = tx || db;
+
+      const deletedPosts = await executor
+        .update(posts)
+        .set({ deletedAt: new Date() })
+        .where(eq(posts.authorId, authorId))
+        .returning();
+
+      return Boolean(deletedPosts.length);
+    },
+
+    async restorePostsByAuthorId(authorId, tx) {
+      const executor = tx || db;
+
+      const restoredPosts = await executor
+        .update(posts)
+        .set({ deletedAt: null })
+        .where(eq(posts.authorId, authorId))
+        .returning();
+
+      return Boolean(restoredPosts);
+    },
+
+    async getAllPostsWithTagsByAuthorId(authorId, tx) {
+      const executor = tx || db;
+
+      const postsWithTags = await executor
+        .select({
+          ...getTableColumns(posts),
+          tags: sql<TGetTagByIdRespSchema[]>`
+        coalesce(
+          json_agg(
+            json_build_object('id', ${tags.id}, 'name', ${tags.name}, 'createdAt', ${tags.createdAt}, 'updatedAt', ${tags.updatedAt})
+          ) filter (where ${tags.id} is not null),
+          '[]'::json
+        )
+        `
+        })
+        .from(posts)
+        .leftJoin(postsToTags, eq(posts.id, postsToTags.postId))
+        .leftJoin(tags, eq(postsToTags.tagId, tags.id))
+        .where(eq(posts.authorId, authorId))
+        .groupBy(posts.id);
+
+      return postsWithTags;
     }
   };
 }

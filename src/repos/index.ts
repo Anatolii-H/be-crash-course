@@ -5,6 +5,7 @@ import { getCommentsRepo } from './comments.repo';
 import { getUsersRepo } from './users.repo';
 import { getTagsRepo } from './tags.repo';
 import { getPostsToTagsRepo } from './postsToTags.repo';
+import { getArchiveRepo } from './archive.repo';
 
 export function getRepos(db: NodePgDatabase) {
   return {
@@ -12,7 +13,8 @@ export function getRepos(db: NodePgDatabase) {
     commentsRepo: getCommentsRepo(db),
     usersRepo: getUsersRepo(db),
     tagsRepo: getTagsRepo(db),
-    postsToTagsRepo: getPostsToTagsRepo(db)
+    postsToTagsRepo: getPostsToTagsRepo(db),
+    archiveRepo: getArchiveRepo(db)
   };
 }
 

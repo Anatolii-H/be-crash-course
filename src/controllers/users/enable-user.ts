@@ -9,7 +9,7 @@ export async function enableUser(params: {
 }) {
   const { usersRepo, userId, identityService } = params;
 
-  const user = await params.usersRepo.getUserById(userId);
+  const user = await params.usersRepo.getUserById({ userId });
 
   if (!user) {
     throw new HttpError(404, 'User not found');

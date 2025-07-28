@@ -4,7 +4,8 @@ import {
   TGetPostByIdRespSchemaExtendedMetadata,
   TGetPostByIdRespSchemaExtended,
   TGetPostByIdRespSchema,
-  TGetPostsReqQueries
+  TGetPostsReqQueries,
+  TGetPostByIdRespSchemaWithTags
 } from 'src/api/schemas/posts/GetPostByIdRespSchema';
 import { TTransaction } from '../ITransaction';
 
@@ -22,4 +23,16 @@ export interface IPostsRepo {
     tx?: TTransaction
   ): Promise<TGetPostByIdRespSchema | null>;
   deletePost(postId: string): Promise<string | null>;
+  getAllPostIdsByAuthorId(authorId: string, tx?: TTransaction): Promise<{ id: string }[]>;
+  getAllSoftDeletedPostIdsByAuthorId(
+    authorId: string,
+    tx?: TTransaction
+  ): Promise<{ id: string }[]>;
+  softDeletePostsByAuthorId(authorId: string, tx?: TTransaction): Promise<boolean>;
+  restorePostsByAuthorId(authorId: string, tx?: TTransaction): Promise<boolean>;
+  getAllPostsWithTagsByAuthorId(
+    authorId: string,
+    tx?: TTransaction
+  ): Promise<TGetPostByIdRespSchemaWithTags[]>;
+  createBulkPosts(payload: TGetPostByIdRespSchema[], tx?: TTransaction): Promise<boolean>;
 }

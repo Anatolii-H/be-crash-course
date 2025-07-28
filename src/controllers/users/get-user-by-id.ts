@@ -4,7 +4,7 @@ import { IUsersRepo } from 'src/types/repos/IUsersRepo';
 export async function getUserById(params: { usersRepo: IUsersRepo; userId: string }) {
   const { usersRepo, userId } = params;
 
-  const foundUser = await usersRepo.getUserById(userId);
+  const foundUser = await usersRepo.getUserById({ userId });
 
   if (!foundUser) {
     throw new HttpError(404, 'User not found');
