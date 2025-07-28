@@ -13,6 +13,10 @@ function isUserNotDeleted() {
   return isNull(users.deletedAt);
 }
 
+function isUserDeleted() {
+  return isNotNull(users.deletedAt);
+}
+
 export function getUsersRepo(db: NodePgDatabase): IUsersRepo {
   return {
     async createUser(payload, sub: string) {
@@ -67,7 +71,7 @@ export function getUsersRepo(db: NodePgDatabase): IUsersRepo {
     },
 
     async getUsers(queries) {
-      const { page, pageSize, search } = queries;
+      const { page, pageSize, search, softDeletedOnly } = queries;
 
       const whereSearchClause =
         search && search.trim() !== ''
@@ -84,7 +88,7 @@ export function getUsersRepo(db: NodePgDatabase): IUsersRepo {
           totalCount: sql<number>`cast(count(*) over() as int)`
         })
         .from(users)
-        .where(and(whereSearchClause, isUserNotDeleted()))
+        .where(and(whereSearchClause, softDeletedOnly ? isUserDeleted() : isUserNotDeleted()))
         .limit(pageSize)
         .offset((page - 1) * pageSize);
 

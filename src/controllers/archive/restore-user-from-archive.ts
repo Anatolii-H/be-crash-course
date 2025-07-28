@@ -28,7 +28,7 @@ export async function restoreUserFromArchive(options: {
     commentsRepo
   } = options;
 
-  const archiveEntry = await archiveRepo.getArchiveEntry(archiveId);
+  const archiveEntry = await archiveRepo.getArchiveById(archiveId);
 
   if (!archiveEntry) {
     throw new HttpError(404, 'Archive entry not found');

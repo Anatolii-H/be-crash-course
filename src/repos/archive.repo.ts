@@ -1,5 +1,9 @@
 import { eq } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import {
+  GetArchiveByIdRespSchema,
+  GetArchiveByIdRespSchemaWithoutData
+} from 'src/api/schemas/archive/GetArchiveByIdRespSchema';
 
 import { archive } from 'src/services/drizzle/schema';
 import { IArchiveRepo } from 'src/types/repos/IArchiveRepo';
@@ -9,11 +13,16 @@ export function getArchiveRepo(db: NodePgDatabase): IArchiveRepo {
 
   return {
     async createArchiveEntry(archiveData, tx) {
-      return executor(tx).insert(archive).values(archiveData).returning();
+      const [createdArchiveEntry] = await executor(tx)
+        .insert(archive)
+        .values(archiveData)
+        .returning();
+
+      return GetArchiveByIdRespSchema.parse(createdArchiveEntry);
     },
 
-    async getArchivedUsers(tx) {
-      return executor(tx)
+    async getArchivesByEntityType(entityType, tx) {
+      const archivesByEntityType = await executor(tx)
         .select({
           id: archive.id,
           archivedAt: archive.archivedAt,
@@ -21,13 +30,22 @@ export function getArchiveRepo(db: NodePgDatabase): IArchiveRepo {
           entityId: archive.entityId
         })
         .from(archive)
-        .where(eq(archive.entityType, 'user'));
+        .where(eq(archive.entityType, entityType));
+
+      return GetArchiveByIdRespSchemaWithoutData.array().parse(archivesByEntityType);
     },
 
-    async getArchiveEntry(archiveId, tx) {
-      const [item] = await executor(tx).select().from(archive).where(eq(archive.id, archiveId));
+    async getArchiveById(archiveId) {
+      const [archiveData] = await executor()
+        .select()
+        .from(archive)
+        .where(eq(archive.id, archiveId));
 
-      return item ?? null;
+      if (!archiveData) {
+        return null;
+      }
+
+      return GetArchiveByIdRespSchema.parse(archiveData);
     },
 
     async deleteArchiveEntry(archiveId, tx) {

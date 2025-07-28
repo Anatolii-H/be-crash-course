@@ -23,7 +23,8 @@ export const UserSchemaExtendedMetadata = z.object({
 export const GetUsersReqQueries = z.object({
   page: z.coerce.number().min(1).optional().default(1),
   pageSize: z.coerce.number().min(1).max(50).optional().default(5),
-  search: z.string().optional().default('')
+  search: z.string().optional().default(''),
+  softDeletedOnly: z.coerce.boolean().optional().default(false)
 });
 
 export type TUserSchema = z.infer<typeof UserSchema>;
