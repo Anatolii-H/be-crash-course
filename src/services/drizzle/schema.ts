@@ -51,7 +51,7 @@ export const posts = pgTable(
     authorId: uuid('author_id')
       .references(() => users.id, { onDelete: 'cascade' })
       .notNull(),
-    deletedAt: timestamp('deleted_at', { withTimezone: true })
+    deletedAt: timestamp('deleted_at')
   },
   (post) => [index('created_at_index').on(post.createdAt)]
 );
@@ -72,7 +72,7 @@ export const comments = pgTable('comments', {
   authorId: uuid('author_id')
     .references(() => users.id, { onDelete: 'cascade' })
     .notNull(),
-  deletedAt: timestamp('deleted_at', { withTimezone: true })
+  deletedAt: timestamp('deleted_at')
 });
 
 export const users = pgTable(
@@ -91,7 +91,7 @@ export const users = pgTable(
       .defaultNow()
       .notNull()
       .$onUpdate(() => new Date()),
-    deletedAt: timestamp('deleted_at', { withTimezone: true })
+    deletedAt: timestamp('deleted_at')
   },
 
   (user) => [

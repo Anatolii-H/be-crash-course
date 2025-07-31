@@ -1,5 +1,5 @@
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { eq } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
 
 import { tags } from 'src/services/drizzle/schema';
 import { ITagsRepo } from 'src/types/repos/ITagsRepo';
@@ -11,6 +11,12 @@ export function getTagsRepo(db: NodePgDatabase): ITagsRepo {
       const [createdTag] = await db.insert(tags).values(payload).returning();
 
       return GetTagByIdRespSchema.parse(createdTag);
+    },
+
+    async getExistingTagIds(tagIds, tx) {
+      const executor = tx || db;
+
+      return executor.select({ id: tags.id }).from(tags).where(inArray(tags.id, tagIds));
     },
 
     async deleteTag(tagId) {

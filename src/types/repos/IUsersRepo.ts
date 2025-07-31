@@ -9,7 +9,8 @@ import { TTransaction } from '../ITransaction';
 export interface IUsersRepo {
   createUser(
     payload: Omit<TSignupReqSchemaWithIsPending, 'password'>,
-    sub: string
+    sub: string,
+    tx?: TTransaction
   ): Promise<TUserSchema>;
   getUserByEmail(email: string): Promise<TUserSchema | null>;
   getUserById(options: {
@@ -28,4 +29,5 @@ export interface IUsersRepo {
   deleteUser(userId: string, tx?: TTransaction): Promise<boolean>;
   restoreSoftDeletedUser(userId: string, tx?: TTransaction): Promise<boolean>;
   getSoftDeletedUsers(userId: string, tx?: TTransaction): Promise<TUserSchema[]>;
+  getExistingUserIds(userIds: string[], tx?: TTransaction): Promise<{ id: string }[]>;
 }

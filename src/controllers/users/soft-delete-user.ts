@@ -2,7 +2,7 @@ import { ITransactionManager } from 'src/types/ITransaction';
 import { ICommentsRepo } from 'src/types/repos/ICommentsRepo';
 import { IPostsRepo } from 'src/types/repos/IPostsRepo';
 import { IUsersRepo } from 'src/types/repos/IUsersRepo';
-import { disableUser } from './disable-user';
+import { disableUser } from '../common/disable-user';
 import { IIdentityService } from 'src/types/services/IIdentityService';
 import { HttpError } from 'src/api/errors/HttpError';
 

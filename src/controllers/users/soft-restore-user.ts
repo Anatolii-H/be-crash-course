@@ -2,7 +2,7 @@ import { ITransactionManager } from 'src/types/ITransaction';
 import { ICommentsRepo } from 'src/types/repos/ICommentsRepo';
 import { IPostsRepo } from 'src/types/repos/IPostsRepo';
 import { IUsersRepo } from 'src/types/repos/IUsersRepo';
-import { enableUser } from './enable-user';
+import { enableUser } from '../common/enable-user';
 import { IIdentityService } from 'src/types/services/IIdentityService';
 
 export async function softRestoreUser(options: {

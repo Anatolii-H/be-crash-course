@@ -25,7 +25,8 @@ const routes: FastifyPluginAsync = async function (f) {
         postsRepo: fastify.repos.postsRepo,
         postsToTagsRepo: fastify.repos.postsToTagsRepo,
         transactionManager: fastify.transactionManager,
-        usersRepo: fastify.repos.usersRepo
+        usersRepo: fastify.repos.usersRepo,
+        tagsRepo: fastify.repos.tagsRepo
       });
     }
   );

@@ -35,4 +35,5 @@ export interface IPostsRepo {
     tx?: TTransaction
   ): Promise<TGetPostByIdRespSchemaWithTags[]>;
   createBulkPosts(payload: TGetPostByIdRespSchema[], tx?: TTransaction): Promise<boolean>;
+  getExistingPostIds(postIds: string[], tx?: TTransaction): Promise<{ id: string }[]>;
 }

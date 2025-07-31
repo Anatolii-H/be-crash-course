@@ -1,4 +1,4 @@
-import { and, eq, getTableColumns, isNotNull, isNull, or, sql } from 'drizzle-orm';
+import { and, eq, getTableColumns, inArray, isNotNull, isNull, or, sql } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 
 import { users } from 'src/services/drizzle/schema';
@@ -19,10 +19,12 @@ function isUserDeleted() {
 
 export function getUsersRepo(db: NodePgDatabase): IUsersRepo {
   return {
-    async createUser(payload, sub: string) {
-      const [createdUser] = await db
+    async createUser(payload, sub, tx) {
+      const executor = tx || db;
+
+      const [createdUser] = await executor
         .insert(users)
-        .values({ ...payload, sub })
+        .values({ ...payload, sub, role: 'user' })
         .returning();
 
       return UserSchema.parse(createdUser);
@@ -42,6 +44,12 @@ export function getUsersRepo(db: NodePgDatabase): IUsersRepo {
       }
 
       return UserSchema.parse(user);
+    },
+
+    async getExistingUserIds(userIds, tx) {
+      const executor = tx || db;
+
+      return executor.select({ id: users.id }).from(users).where(inArray(users.id, userIds));
     },
 
     async getUserByEmail(email: string) {

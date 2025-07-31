@@ -44,6 +44,12 @@ export function getPostsRepo(db: NodePgDatabase): IPostsRepo {
       return GetPostByIdRespSchema.parse(createdPost);
     },
 
+    async getExistingPostIds(postIds, tx) {
+      const executor = tx || db;
+
+      return executor.select({ id: posts.id }).from(posts).where(inArray(posts.id, postIds));
+    },
+
     async createBulkPosts(payload, tx) {
       const executor = tx || db;
 
