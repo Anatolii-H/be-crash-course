@@ -30,7 +30,9 @@ const routes: FastifyPluginAsync = async function (f) {
       return updateComment({
         commentsRepo: fastify.repos.commentsRepo,
         payload: request.body,
-        commentId: request.params.commentId
+        commentId: request.params.commentId,
+        uuidService: fastify.uuid,
+        usersRepo: fastify.repos.usersRepo
       });
     }
   );
@@ -49,7 +51,9 @@ const routes: FastifyPluginAsync = async function (f) {
     async (request, reply) => {
       await deleteComment({
         commentsRepo: fastify.repos.commentsRepo,
-        commentId: request.params.commentId
+        commentId: request.params.commentId,
+        postId: request.params.postId,
+        uuidService: fastify.uuid
       });
 
       reply.code(204);

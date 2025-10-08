@@ -19,6 +19,7 @@ export const EnvSchema = z.object({
   SWAGGER_PWD: z.string().min(10),
 
   COGNITO_USER_POOL_ID: z.string(),
+  COGNITO_CLIENT_ID: z.string(),
   KMS_KEY_ID: z.string(),
 
   RESET_PASSWORD_TOKEN_TTL_MS: z.coerce.number(),
@@ -27,7 +28,12 @@ export const EnvSchema = z.object({
   SENDGRID_API_KEY: z.string(),
 
   FRONTEND_BASE_URL: z.string(),
-  FRONTEND_RESET_PASSWORD_URL: z.string()
+  FRONTEND_RESET_PASSWORD_URL: z.string(),
+
+  REDIS_URL: z.string(),
+  REDIS_PORT: z.coerce.number(),
+
+  WS_PORT: z.coerce.number()
 });
 
 export type Env = z.infer<typeof EnvSchema>;

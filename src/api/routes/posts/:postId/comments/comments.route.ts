@@ -28,7 +28,9 @@ const routes: FastifyPluginAsync = async function (f) {
         commentsRepo: fastify.repos.commentsRepo,
         payload: request.body,
         postId: request.params.postId,
-        authorId: request.profile?.id as string
+        authorId: request.profile?.id as string,
+        uuidService: fastify.uuid,
+        usersRepo: fastify.repos.usersRepo
       });
 
       reply.code(201).send(createdComment);

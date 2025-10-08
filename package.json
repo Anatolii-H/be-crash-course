@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "local": "nodemon -r tsconfig-paths/register src/api/api.ts",
+    "local:ws": "nodemon -r tsconfig-paths/register src/ws/server.ts",
     "local:env": "docker compose -f docker-compose.local.yml up",
     "build": "rm -R -f dist && tsc -p tsconfig.build.json",
     "production": "TS_NODE_BASEURL=dist node -r tsconfig-paths/register dist/src/api/api.js",
@@ -28,11 +29,15 @@
     "@fastify/swagger": "^9.4.0",
     "@fastify/swagger-ui": "^5.2.1",
     "@sendgrid/mail": "^8.1.5",
+    "@socket.io/redis-adapter": "^8.3.0",
+    "aws-jwt-verify": "^5.1.1",
     "dotenv": "^16.5.0",
     "drizzle-orm": "^0.38.4",
     "fastify": "^5.2.1",
     "fastify-type-provider-zod": "^4.0.2",
+    "ioredis": "^5.8.1",
     "pg": "^8.13.1",
+    "socket.io": "^4.8.1",
     "tsconfig-paths": "^4.2.0",
     "zod": "^3.24.1"
   },

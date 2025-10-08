@@ -79,7 +79,8 @@ export function getPostsRepo(db: NodePgDatabase): IPostsRepo {
         .select()
         .from(comments)
         .leftJoin(users, eq(comments.authorId, users.id))
-        .where(and(eq(comments.postId, postId), isNull(comments.deletedAt)));
+        .where(and(eq(comments.postId, postId), isNull(comments.deletedAt)))
+        .orderBy(asc(comments.createdAt));
 
       const commentsWithAuthors = commentsForPost.map((result) => {
         const { comments: commentData, users: commentAuthorData } = result;
