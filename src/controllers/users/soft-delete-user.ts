@@ -34,6 +34,7 @@ export async function softDeleteUser(options: {
       ({ id }) => id
     );
 
+    // CODE REVIEW: ВАЖЛИВО! Promise.all в транзакції. Дивись restore-user-from-archive.ts
     await Promise.all([
       commentsRepo.softDeleteAllRelatedComments(userId, userPostIds, sharedTx),
       postsRepo.softDeletePostsByAuthorId(userId, sharedTx),

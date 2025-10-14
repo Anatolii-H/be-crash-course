@@ -21,6 +21,7 @@ export async function softRestoreUser(options: {
       ({ id }) => id
     );
 
+    // CODE REVIEW: ВАЖЛИВО! Promise.all в транзакції. Дивись restore-user-from-archive.ts
     await Promise.all([
       commentsRepo.restoreSoftDeletedComments(userId, userPostIds, sharedTx),
       postsRepo.restorePostsByAuthorId(userId, sharedTx),

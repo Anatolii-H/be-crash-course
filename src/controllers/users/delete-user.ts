@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import { HttpError } from 'src/api/errors/HttpError';
 import { ITransactionManager } from 'src/types/ITransaction';
 import { IArchiveRepo } from 'src/types/repos/IArchiveRepo';
@@ -38,6 +39,8 @@ export async function deleteUser(options: {
   }
 
   await transactionManager.execute(async ({ sharedTx }) => {
+// CODE REVIEW: Гет краще робити поза транзакцією, щоб зменшити навантаження на транзакцію. 
+// Транзакція має бути тільки для операцій, які вносять зміни в базу даних, щоб їх можна було ревертнути, якщо станеться помилка
     const postsWithTags = await postsRepo.getAllPostsWithTagsByAuthorId(userId, sharedTx);
     const postIds = postsWithTags.map((p) => p.id);
     const relatedComments = await commentsRepo.getAllRelatedComments(userId, postIds, sharedTx);

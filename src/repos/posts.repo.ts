@@ -46,7 +46,7 @@ export function getPostsRepo(db: NodePgDatabase): IPostsRepo {
 
     async getExistingPostIds(postIds, tx) {
       const executor = tx || db;
-
+      // CODE REVIEW: Валідація респонсу з бази після гету. 
       return executor.select({ id: posts.id }).from(posts).where(inArray(posts.id, postIds));
     },
 
@@ -116,7 +116,7 @@ export function getPostsRepo(db: NodePgDatabase): IPostsRepo {
 
     async getAllSoftDeletedPostIdsByAuthorId(authorId, tx) {
       const executor = tx || db;
-
+      // CODE REVIEW: Валідація респонсу з бази після гету. 
       return executor
         .select({ id: posts.id })
         .from(posts)
@@ -207,6 +207,7 @@ export function getPostsRepo(db: NodePgDatabase): IPostsRepo {
         });
       }
 
+      // CODE REVIEW: Замість цього коду, використай json_agg для отримання тегів в постах
       const tagsForPosts = await db
         .select({
           postId: postsToTags.postId,
@@ -320,6 +321,7 @@ export function getPostsRepo(db: NodePgDatabase): IPostsRepo {
         .where(eq(posts.authorId, authorId))
         .groupBy(posts.id);
 
+        // CODE REVIEW: Валідація респонсу. 
       return postsWithTags;
     }
   };

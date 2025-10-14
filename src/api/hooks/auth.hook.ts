@@ -27,6 +27,8 @@ export const authHook: preHandlerAsyncHookHandler = async function (request) {
 
     const identityUser = await this.identityService.getUserByAccessToken(bearerToken);
 
+    // CODE REVIEW: тут має бути перевірка чи є identityUser 
+    
     request.identityUser = identityUser;
 
     const { usersRepo } = this.repos;

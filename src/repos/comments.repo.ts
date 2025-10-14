@@ -28,6 +28,7 @@ export function getCommentsRepo(db: NodePgDatabase): ICommentsRepo {
     },
 
     async getCommentsByPostId(postId) {
+      // CODE REVIEW: Ти маєш валідувати респонс з бази після гету. 
       return db
         .select()
         .from(comments)
@@ -125,6 +126,7 @@ export function getCommentsRepo(db: NodePgDatabase): ICommentsRepo {
         return executor.select().from(comments).where(eq(comments.authorId, userId));
       }
 
+      // CODE REVIEW: Валідація респонсу з бази після гету. 
       return executor
         .select()
         .from(comments)

@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import { CognitoIdentityProvider } from '@aws-sdk/client-cognito-identity-provider';
 import { HttpError } from 'src/api/errors/HttpError';
 
@@ -78,9 +79,10 @@ export const getAWSCognitoService = (options: { userPoolId: string }): IIdentity
           },
           {}
         );
-
+// CODE REVIEW: Використовуючи тут non-null assertion operator "!", ти ломаєш логіку тайпскріпта і отримуєш місце потенційного багу. 
+// Ти не можеш бути впевненим що rawUserData не буде undefined, так як user.UserAttributes може бути undefined.
         return IdentityUserSchema.parse({
-          subId: rawUserData!.sub,
+          subId: rawUserData!.sub, 
           email: rawUserData!.email
         });
       } catch (err) {

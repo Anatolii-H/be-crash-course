@@ -102,6 +102,9 @@ export async function restoreUserFromArchive(options: {
       await postsToTagsRepo.createPostsToTagsRelation(tagsToInsert, sharedTx);
     }
 
+    // CODE REVIEW: ВАЖЛИВО! В транзакції не можна використовувати Promise.all, оскільки 
+    // вона не гарантує порядок виконання запитів. І при виникненні помилки, не має гарантій що
+    // транзакція відкатиться нормально.
     const [existingUserIds, existingPostIds] = await Promise.all([
       usersRepo.getExistingUserIds(archiveCommentAuthorIds, sharedTx),
       postsRepo.getExistingPostIds([...externalPostIds, ...archivePostIdsSet], sharedTx)

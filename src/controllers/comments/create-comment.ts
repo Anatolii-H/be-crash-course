@@ -19,6 +19,7 @@ export async function createComment(params: {
     params.authorId
   );
 
+  // CODE REVIEW: В тебе вже є юзер в реквесті. Ти можеш його і використовувати.
   const author = await params.usersRepo.getUserById({ userId: params.authorId });
 
   const event: TCommentEvent = {
