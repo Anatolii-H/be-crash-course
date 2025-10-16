@@ -9,6 +9,9 @@ export function registerSocketEventsHandler(socket: Socket) {
       return;
     }
 
+    // WEBSOCKET: Треба додати перевірку чи такий пост взагалі існує в твоїй базі даних.
+    // Якщо немає, то не треба робити join room.
+
     const room = `post:${payload.postId}`;
 
     socket.join(room);

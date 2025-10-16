@@ -29,7 +29,7 @@ export async function createComment(params: {
     eventId: params.uuidService.getUUID(),
     occurredAt: new Date().toISOString()
   };
-
+  // WEBSOCKET: Що станеться якщо тут станеться помилка?
   await publishCommentEvent(event);
 
   return comment;

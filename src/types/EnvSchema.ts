@@ -31,7 +31,8 @@ export const EnvSchema = z.object({
   FRONTEND_RESET_PASSWORD_URL: z.string(),
 
   REDIS_URL: z.string(),
-  REDIS_PORT: z.coerce.number(),
+  // WEBSOCKET: REDIS_PORT має бути string, а не number
+  REDIS_PORT: z.string(),
 
   WS_PORT: z.coerce.number()
 });

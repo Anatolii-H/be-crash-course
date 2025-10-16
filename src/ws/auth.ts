@@ -4,6 +4,8 @@ import { ExtendedError, Socket } from 'socket.io';
 const COGNITO_USER_POOL_ID = process.env.COGNITO_USER_POOL_ID;
 const COGNITO_CLIENT_ID = process.env.COGNITO_CLIENT_ID;
 
+// WEBSOCKET: В тебе є метод для отримання юзера по токену, тобі не треба підключати aws-jwt-verify
+// identityService.getUserByAccessToken(bearerToken);
 const cognitoJwtVerifier = CognitoJwtVerifier.create({
   userPoolId: COGNITO_USER_POOL_ID,
   tokenUse: 'access',
